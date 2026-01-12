@@ -1,12 +1,111 @@
+// frontend/src/components/TokenDisplay.tsx
 import type React from "react";
-
 import { useState } from "react";
 import { Wallet, Zap, Gift, Copy, Check, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
+import {
+  useCreateOrderMutation,
+  useVerifyPaymentMutation,
+} from "@/redux-store/services/purchaseApi";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/redux-store/store";
 
 export default function TokenDisplay() {
   const [referenceCode, setReferenceCode] = useState("");
   const [copied, setCopied] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const [createOrder] = useCreateOrderMutation();
+  const [verifyPayment] = useVerifyPaymentMutation();
+
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  const TOKENS_PER_PLAN = 1;
+
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handleRecharge = async () => {
+    try {
+      setIsProcessing(true);
+
+      const loaded = await loadRazorpayScript();
+      if (!loaded) {
+        toast.error("Failed to load payment gateway");
+        setIsProcessing(false);
+        return;
+      }
+
+      const orderData = await createOrder({
+        tokenQuantity: TOKENS_PER_PLAN,
+      }).unwrap();
+
+      const options = {
+        key: orderData.keyId,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "ScanFleet",
+        description: `${TOKENS_PER_PLAN} Token${
+          TOKENS_PER_PLAN > 1 ? "s" : ""
+        } Recharge`,
+        order_id: orderData.orderId,
+        handler: async (response: any) => {
+          try {
+            const result = await verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            }).unwrap();
+
+            toast.success(
+              `${result.data.tokensAdded} token${
+                result.data.tokensAdded > 1 ? "s" : ""
+              } added to your wallet`
+            );
+          } catch (error: any) {
+            toast.error(error?.data?.message || "Payment verification failed");
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+        prefill: {
+          name: user?.name || "",
+          email: user?.email || "",
+          contact: user?.phone || "",
+        },
+        theme: {
+          color: "#06b6d4",
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(false);
+            toast.error("Payment cancelled");
+          },
+        },
+      };
+
+      const razorpay = new (window as any).Razorpay(options);
+      razorpay.open();
+    } catch (error: any) {
+      console.error("Payment initiation failed:", error);
+      toast.error(error?.data?.message || "Failed to initiate payment");
+      setIsProcessing(false);
+    }
+  };
 
   const handleCopyToken = () => {
     setCopied(true);
@@ -23,7 +122,6 @@ export default function TokenDisplay() {
 
   return (
     <div className='min-h-screen w-full relative bg-black py-12 px-4'>
-      {/* Aurora Background */}
       <div
         className='absolute inset-0 z-0'
         style={{
@@ -37,9 +135,7 @@ export default function TokenDisplay() {
         }}
       />
 
-      {/* Content */}
       <div className='relative z-10 max-w-6xl mx-auto'>
-        {/* Header */}
         <div className='text-center mb-16'>
           <h1 className='text-4xl sm:text-5xl font-bold mb-4 bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 bg-clip-text text-transparent'>
             ScanFleet Tokens
@@ -49,9 +145,7 @@ export default function TokenDisplay() {
           </p>
         </div>
 
-        {/* Main Grid */}
         <div className='grid lg:grid-cols-3 gap-8 mb-12'>
-          {/* Token Explanation */}
           <div className='lg:col-span-1'>
             <div className='bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 h-full'>
               <div className='flex items-center gap-3 mb-6'>
@@ -96,7 +190,6 @@ export default function TokenDisplay() {
                     Get 100 rupees worth of redeem on your next purchase
                   </p>
                   <br />
-                  {/* Info Box with Share */}
                   <div className='bg-cyan-500/5 border border-cyan-500/20 rounded-lg p-4'>
                     <div className='flex items-center justify-between'>
                       <p className='text-sm text-white/70'>
@@ -114,7 +207,6 @@ export default function TokenDisplay() {
                             window.location.origin
                           }/signup?ref=${encodeURIComponent("USER_REF_CODE")}`;
                           navigator.clipboard.writeText(referralLink);
-                          // Optionally show toast notification
                         }}
                         className='border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 bg-transparent ml-4 shrink-0'
                       >
@@ -128,9 +220,7 @@ export default function TokenDisplay() {
             </div>
           </div>
 
-          {/* Wallet Card & Token Display */}
           <div className='lg:col-span-2 space-y-8'>
-            {/* Wallet Card */}
             <div className='relative'>
               <div className='absolute -inset-1 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl blur-xl opacity-50' />
               <div className='relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8'>
@@ -150,7 +240,6 @@ export default function TokenDisplay() {
                   </div>
                 </div>
 
-                {/* Token Value Breakdown */}
                 <div className='grid grid-cols-3 gap-4 mb-8'>
                   <div className='bg-cyan-500/10 border border-cyan-500/20 rounded-lg p-4 text-center'>
                     <p className='text-sm text-white/60 mb-1'>Token Value</p>
@@ -166,7 +255,6 @@ export default function TokenDisplay() {
                   </div>
                 </div>
 
-                {/* Wallet Details */}
                 <div className='border-t border-white/10 pt-6'>
                   <div className='space-y-3 text-sm'>
                     <div className='flex justify-between'>
@@ -185,7 +273,6 @@ export default function TokenDisplay() {
                     </div>
                   </div>
 
-                  {/* Progress Bar */}
                   <div className='mt-4'>
                     <div className='flex justify-between mb-2'>
                       <span className='text-xs text-white/60'>Token Usage</span>
@@ -199,7 +286,6 @@ export default function TokenDisplay() {
                   </div>
                 </div>
 
-                {/* Action Buttons */}
                 <div className='grid grid-cols-2 gap-4 mt-8'>
                   <Button
                     onClick={handleCopyToken}
@@ -218,14 +304,17 @@ export default function TokenDisplay() {
                       </>
                     )}
                   </Button>
-                  <Button className='bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white border-0'>
-                    Recharge Tokens
+                  <Button
+                    onClick={handleRecharge}
+                    disabled={isProcessing}
+                    className='bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white border-0 disabled:opacity-50'
+                  >
+                    {isProcessing ? "Processing..." : "Recharge Tokens"}
                   </Button>
                 </div>
               </div>
             </div>
 
-            {/* Reference Code Input */}
             <div className='bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8'>
               <div className='flex items-center gap-3 mb-6'>
                 <QrCode className='text-pink-400' size={28} />
@@ -258,14 +347,11 @@ export default function TokenDisplay() {
                     </Button>
                   </div>
                 </div>
-
-                {/* Info Box */}
               </form>
             </div>
           </div>
         </div>
 
-        {/* Features Grid */}
         <div className='grid md:grid-cols-3 gap-6'>
           <div className='bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 text-center hover:bg-white/10 transition-colors'>
             <Zap className='text-cyan-400 mx-auto mb-3' size={24} />
