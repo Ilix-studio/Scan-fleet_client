@@ -3,9 +3,7 @@
   "env": {
     "VERCEL_TOOLBAR": "0"
   },
-  "build": {
-    "command": "npm run build"
-  },
+
   "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
@@ -18,6 +16,6 @@
       ]
     }
   ],
-  "redirects": [],
+
   "routes": [{ "src": "/(.*)", "dest": "/index.html" }]
 }

@@ -82,6 +82,14 @@ export const handleApiError = (error: any): string => {
 export const baseApi = createApi({
   reducerPath: "scanfleet-api",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["User", "Token", "Sticker", "Purchase", "Analytics", "ApiAccount"],
+  tagTypes: [
+    "Admin",
+    "User",
+    "Token",
+    "Sticker",
+    "Purchase",
+    "Analytics",
+    "ApiAccount",
+  ],
   endpoints: () => ({}),
 });
