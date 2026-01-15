@@ -4,7 +4,7 @@ import { useState, useRef, useCallback } from "react";
 import Konva from "konva";
 import { Undo2, Redo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { EditorElement, LanguageOption } from "./StickerEditor.types";
+
 import {
   CANVAS_SIZE,
   DEFAULT_TEMPLATES,
@@ -28,6 +28,7 @@ import { ToolPanel } from "./SE_Components/ToolPanel";
 import { ReferenceCodePanel } from "./SE_Components/ReferenceCodePanel";
 import { PropertiesPanel } from "./SE_Components/PropertiesPanel";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { EditorElement, LanguageOption } from "@/types/stickerEditor.types";
 
 type TabType = "templates" | "shapes" | "icons" | "text" | "borders" | "images";
 
@@ -54,7 +55,7 @@ const StickerEditor = () => {
 
   // RTK Query mutation hook - this replaces the direct saveSticker function call
   // The hook returns an array: [trigger function, result object with status]
-  const [saveSticker, { isLoading: isSaving, isError, error }] =
+  const [saveSticker, { isLoading: isSaving, isError }] =
     useSaveStickerMutation();
 
   // Refs
@@ -210,7 +211,7 @@ const StickerEditor = () => {
       const template = DEFAULT_TEMPLATES.find((t) => t.id === templateId);
       if (!template) return;
 
-      const newElements: EditorElement[] = template.elements.map((el) => ({
+      const newElements: EditorElement[] = template.elements.map((el: any) => ({
         id: generateId(),
         type: el.type || "rect",
         x: el.x || CANVAS_SIZE / 2,

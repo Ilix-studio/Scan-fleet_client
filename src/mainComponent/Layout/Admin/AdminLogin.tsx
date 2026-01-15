@@ -3,7 +3,7 @@ import { useState, FormEvent, ChangeEvent } from "react";
 import { Eye, EyeOff, Mail, Lock, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useAdminLoginMutation } from "@/redux-store/services/AdminCentrix/AdminAuthApi";
+import { useAdminLoginMutation } from "@/redux-store/services/AdminCentrix/adminAuthApi";
 
 const AdminLogin = () => {
   const navigate = useNavigate();

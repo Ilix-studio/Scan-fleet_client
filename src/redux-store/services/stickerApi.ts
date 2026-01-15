@@ -1,42 +1,13 @@
 // redux-store/services/stickerApi.ts
 import { baseApi } from "./baseApi";
-import type { EditorElement } from "../slices/editorSlice";
 
-interface SaveStickerRequest {
-  elements: EditorElement[];
-  imageData: string;
-  language: string;
-  template?: string;
-}
-
-interface SaveStickerResponse {
-  referenceCode: string;
-  expiresAt: string;
-  stickerDesignId: string;
-}
-
-interface RetrieveStickerResponse {
-  referenceCode: string;
-  elements: EditorElement[];
-  imageData: string;
-  language: string;
-  template?: string;
-  status: "active" | "expired" | "used";
-  createdAt: string;
-  expiresAt: string;
-}
-
-interface UseStickerRequest {
-  referenceCode: string;
-  tokenId: string;
-}
-
-interface UseStickerResponse {
-  success: boolean;
-  stickerId: string;
-  qrCode: string;
-  trackingNumber?: string;
-}
+import { SaveStickerResponse } from "@/types/stickerEditor.types";
+import {
+  SaveStickerRequest,
+  RetrieveStickerResponse,
+  UseStickerRequest,
+  UseStickerResponse,
+} from "@/types/stickerEditor.types";
 
 export const stickerApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
