@@ -1,36 +1,73 @@
-// StickerEditor.types.ts
-export interface EditorElement {
+// src/types/stickerEditor.types.ts
+
+export type ShapeType = "rect" | "circle" | "star" | "triangle" | "arrow";
+export type ElementType = ShapeType | "text" | "image" | "border";
+
+export interface BaseElement {
   id: string;
-  type: "shape" | "text" | "icon" | "image" | "border";
+  type: ElementType;
   x: number;
   y: number;
   width: number;
   height: number;
   rotation: number;
-  shapeType?: "rectangle" | "circle" | "star" | "triangle" | "arrow";
-  fill?: string;
+  scaleX: number;
+  scaleY: number;
+  zIndex: number;
+}
+
+export interface ShapeElement extends BaseElement {
+  type: ShapeType;
+  fill: string;
   stroke?: string;
   strokeWidth?: number;
-  borderStyle?: "solid" | "dashed" | "rounded" | "double";
-  text?: string;
-  fontSize?: number;
-  fontFamily?: string;
-  textColor?: string;
-  iconName?: string;
-  imageUrl?: string;
-  zIndex: number;
-  // Additional properties that might be used by the editor
-  scaleX?: number;
-  scaleY?: number;
   radius?: number;
-  points?: number[];
+  // Star properties
+  numPoints?: number;
   innerRadius?: number;
   outerRadius?: number;
-  numPoints?: number;
+  // Arrow properties
+  points?: number[];
+  // Border style
+  borderStyle?: "solid" | "dashed" | "dotted" | "rounded" | "double";
 }
-export interface HistoryState {
+
+export interface TextElement extends BaseElement {
+  type: "text";
+  text: string;
+  fontSize: number;
+  fontFamily: string;
+  fontStyle?: string;
+  fill: string;
+}
+
+export interface ImageElement extends BaseElement {
+  type: "image";
+  imageSrc: string;
+  imageElement?: HTMLImageElement;
+}
+
+export interface BorderElement extends BaseElement {
+  type: "border";
+  fill: string;
+  stroke: string;
+  strokeWidth: number;
+  borderStyle: "solid" | "dashed" | "rounded" | "double";
+}
+
+export type EditorElement =
+  | ShapeElement
+  | TextElement
+  | ImageElement
+  | BorderElement;
+
+export interface EditorState {
   elements: EditorElement[];
-  selectedId: string | null;
+  selectedElementId: string | null;
+  canvasSize: { width: number; height: number };
+  currentTemplate: string | null;
+  language: string;
+  isDirty: boolean;
 }
 
 export interface LanguageOption {
@@ -47,11 +84,7 @@ export interface DefaultTemplate {
   elements: Partial<EditorElement>[];
 }
 
-export interface StickerData {
-  imageData: string;
-  referenceCode: string | null;
-  elements: Omit<EditorElement, "imageElement">[];
-}
+// API types
 export interface SaveStickerRequest {
   elements: EditorElement[];
   imageData: string;
@@ -60,18 +93,18 @@ export interface SaveStickerRequest {
 }
 
 export interface SaveStickerResponse {
+  success: boolean;
   referenceCode: string;
   expiresAt: string;
-  stickerDesignId: string;
+  expiresIn: string;
 }
 
 export interface RetrieveStickerResponse {
+  success: boolean;
   referenceCode: string;
-  elements: EditorElement[];
   imageData: string;
-  language: string;
-  template?: string;
-  status: "active" | "expired" | "used";
+  elements: EditorElement[];
+  status: string;
   createdAt: string;
   expiresAt: string;
 }
@@ -83,7 +116,14 @@ export interface UseStickerRequest {
 
 export interface UseStickerResponse {
   success: boolean;
-  stickerId: string;
-  qrCode: string;
-  trackingNumber?: string;
+  referenceCode: string;
+  status: string;
+  newExpiresAt: string;
+}
+// src/types/stickerEditor.types.ts
+
+export interface ImageElement extends BaseElement {
+  type: "image";
+  imageSrc: string; // base64 only - no HTMLImageElement
+  fill?: string;
 }

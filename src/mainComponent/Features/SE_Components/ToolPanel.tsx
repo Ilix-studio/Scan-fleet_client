@@ -26,7 +26,7 @@ import {
   DEFAULT_TEMPLATES,
   FONT_FAMILIES,
 } from "../StickerEditor.contants";
-import { LanguageOption } from "../StickerEditor.types";
+import { LanguageOption } from "@/types/stickerEditor.types";
 
 type TabType = "templates" | "shapes" | "icons" | "text" | "borders" | "images";
 

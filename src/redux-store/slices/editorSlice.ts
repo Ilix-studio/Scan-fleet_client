@@ -1,37 +1,6 @@
 // redux-store/slices/editorSlice.ts
+import { EditorElement, EditorState } from "@/types/stickerEditor.types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-export interface EditorElement {
-  id: string;
-  type: "shape" | "text" | "icon" | "image" | "border";
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  rotation: number;
-  shapeType?: "rectangle" | "circle" | "star" | "triangle" | "arrow";
-  fill?: string;
-  stroke?: string;
-  strokeWidth?: number;
-  borderStyle?: "solid" | "dashed" | "rounded" | "double";
-  text?: string;
-  fontSize?: number;
-  fontFamily?: string;
-  textColor?: string;
-  iconName?: string;
-  imageUrl?: string;
-  zIndex: number;
-}
-
-// Export the EditorState interface as well
-export interface EditorState {
-  elements: EditorElement[];
-  selectedElementId: string | null;
-  canvasSize: { width: number; height: number };
-  currentTemplate: string | null;
-  language: string;
-  isDirty: boolean;
-}
 
 const initialState: EditorState = {
   elements: [],
@@ -41,7 +10,6 @@ const initialState: EditorState = {
   language: "en",
   isDirty: false,
 };
-
 const editorSlice = createSlice({
   name: "editor",
   initialState,
@@ -55,13 +23,22 @@ const editorSlice = createSlice({
         (max, el) => Math.max(max, el.zIndex),
         0
       );
-      const newElement: EditorElement = {
-        ...action.payload,
+
+      // Remove non-serializable properties before adding to state
+      const payload = action.payload;
+      const element: any = {
+        ...payload,
         id: `el_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         zIndex: maxZ + 1,
       };
-      state.elements.push(newElement);
-      state.selectedElementId = newElement.id;
+
+      // Exclude imageElement from Redux state
+      if ("imageElement" in element) {
+        delete element.imageElement;
+      }
+
+      state.elements.push(element);
+      state.selectedElementId = element.id;
       state.isDirty = true;
     },
 
@@ -115,7 +92,16 @@ const editorSlice = createSlice({
       state,
       action: PayloadAction<{ elements: EditorElement[]; template?: string }>
     ) => {
-      state.elements = action.payload.elements;
+      // Remove non-serializable properties
+      const sanitizedElements = action.payload.elements.map((el) => {
+        if (el.type === "image") {
+          const { ...rest } = el;
+          return rest;
+        }
+        return el;
+      });
+
+      state.elements = sanitizedElements as any;
       state.currentTemplate = action.payload.template || null;
       state.selectedElementId = null;
       state.isDirty = false;

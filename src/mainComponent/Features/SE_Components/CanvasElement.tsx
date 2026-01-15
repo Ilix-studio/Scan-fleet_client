@@ -10,7 +10,7 @@ import {
   Image as KonvaImage,
 } from "react-konva";
 import Konva from "konva";
-import { EditorElement } from "../StickerEditor.types";
+import { EditorElement } from "@/types/stickerEditor.types";
 
 interface CanvasElementProps {
   element: EditorElement;

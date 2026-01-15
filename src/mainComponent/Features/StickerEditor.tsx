@@ -28,7 +28,12 @@ import { ToolPanel } from "./SE_Components/ToolPanel";
 import { ReferenceCodePanel } from "./SE_Components/ReferenceCodePanel";
 import { PropertiesPanel } from "./SE_Components/PropertiesPanel";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { EditorElement, LanguageOption } from "@/types/stickerEditor.types";
+import {
+  EditorElement,
+  LanguageOption,
+  ShapeElement,
+  TextElement,
+} from "@/types/stickerEditor.types";
 
 type TabType = "templates" | "shapes" | "icons" | "text" | "borders" | "images";
 
@@ -115,8 +120,8 @@ const StickerEditor = () => {
       const newElements = elements.map((el) =>
         el.id === id ? { ...el, ...updates } : el
       );
-      setElements(newElements);
-      pushHistory(newElements, selectedId);
+      setElements(newElements as EditorElement[]);
+      pushHistory(newElements as EditorElement[], selectedId);
     },
     [elements, pushHistory, selectedId]
   );
@@ -206,30 +211,48 @@ const StickerEditor = () => {
     [addElement]
   );
 
+  // src/mainComponent/Features/StickerEditor.tsx
+
   const handleLoadTemplate = useCallback(
     (templateId: string) => {
       const template = DEFAULT_TEMPLATES.find((t) => t.id === templateId);
       if (!template) return;
 
-      const newElements: EditorElement[] = template.elements.map((el: any) => ({
-        id: generateId(),
-        type: el.type || "rect",
-        x: el.x || CANVAS_SIZE / 2,
-        y: el.y || CANVAS_SIZE / 2,
-        width: el.width,
-        height: el.height,
-        radius: el.radius,
-        fill: el.fill || "#ffffff",
-        stroke: el.stroke,
-        strokeWidth: el.strokeWidth || 2,
-        rotation: 0,
-        scaleX: 1,
-        scaleY: 1,
-        text: el.text,
-        fontSize: el.fontSize,
-        fontFamily: el.fontFamily || "Arial, sans-serif",
-        fontStyle: el.fontStyle,
-      })) as EditorElement[];
+      const newElements: EditorElement[] = template.elements.map((el: any) => {
+        const base = {
+          id: generateId(),
+          x: el.x || CANVAS_SIZE / 2,
+          y: el.y || CANVAS_SIZE / 2,
+          width: el.width || 80,
+          height: el.height || 60,
+          rotation: 0,
+          scaleX: 1,
+          scaleY: 1,
+          zIndex: 0,
+        };
+
+        // Type-safe element creation
+        if (el.text !== undefined) {
+          return {
+            ...base,
+            type: "text" as const,
+            text: el.text,
+            fontSize: el.fontSize || 24,
+            fontFamily: el.fontFamily || "Arial, sans-serif",
+            fontStyle: el.fontStyle,
+            fill: el.fill || "#000000",
+          } as TextElement;
+        }
+
+        return {
+          ...base,
+          type: el.type || "rect",
+          fill: el.fill || "#ffffff",
+          stroke: el.stroke,
+          strokeWidth: el.strokeWidth || 2,
+          radius: el.radius,
+        } as ShapeElement;
+      });
 
       setElements(newElements);
       setSelectedId(null);

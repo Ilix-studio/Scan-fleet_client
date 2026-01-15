@@ -2,7 +2,7 @@
 
 import { Layers, Move, Copy, Trash2, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { EditorElement } from "../StickerEditor.types";
+import { EditorElement } from "@/types/stickerEditor.types";
 
 interface PropertiesPanelProps {
   selectedElement: EditorElement | undefined;
@@ -222,12 +222,17 @@ export const PropertiesPanel = ({
               <div
                 className='w-4 h-4 rounded'
                 style={{
-                  backgroundColor: el.fill === "transparent" ? "#666" : el.fill,
+                  backgroundColor:
+                    "fill" in el && el.fill
+                      ? el.fill === "transparent"
+                        ? "#666"
+                        : el.fill
+                      : "#666",
                 }}
               />
               <span className='truncate'>
                 {el.type}
-                {el.text ? `: ${el.text.slice(0, 8)}` : ""}
+                {"text" in el && el.text ? `: ${el.text.slice(0, 8)}` : ""}
               </span>
             </button>
           ))}

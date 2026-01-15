@@ -1,26 +1,16 @@
-// utils/stickerEditor.ts
-
+import { EditorElement, ShapeType } from "@/types/stickerEditor.types";
 import { CANVAS_SIZE, ICON_MAP } from "./StickerEditor.contants";
-import { EditorElement } from "./StickerEditor.types";
 
 export const generateId = (): string =>
   `el_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-export const generateReferenceCode = (): string => {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "SF-";
-  for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
-};
-
 export const createShapeElement = (
-  type: EditorElement["type"],
+  type: ShapeType,
   fill: string,
-  stroke: string
+  stroke: string,
+  zIndex: number = 0
 ): EditorElement => {
-  const base: EditorElement = {
+  const base = {
     id: generateId(),
     type,
     x: CANVAS_SIZE / 2,
@@ -31,21 +21,28 @@ export const createShapeElement = (
     rotation: 0,
     scaleX: 1,
     scaleY: 1,
+    zIndex,
+    width: 80,
+    height: 60,
   };
 
   switch (type) {
     case "rect":
-      return { ...base, width: 80, height: 60 };
+      return { ...base, type: "rect" };
     case "circle":
-      return { ...base, radius: 40 };
+      return { ...base, type: "circle", radius: 40 };
     case "star":
-      return { ...base, numPoints: 5, innerRadius: 20, outerRadius: 40 };
+      return {
+        ...base,
+        type: "star",
+        numPoints: 5,
+        innerRadius: 20,
+        outerRadius: 40,
+      };
     case "triangle":
-      return { ...base, radius: 40 };
+      return { ...base, type: "triangle", radius: 40 };
     case "arrow":
-      return { ...base, points: [0, 0, 60, 0] };
-    default:
-      return base;
+      return { ...base, type: "arrow", points: [0, 0, 60, 0] };
   }
 };
 
@@ -53,16 +50,20 @@ export const createTextElement = (
   text: string,
   fill: string,
   fontSize: number,
-  fontFamily: string
+  fontFamily: string,
+  zIndex: number = 0
 ): EditorElement => ({
   id: generateId(),
   type: "text",
   x: CANVAS_SIZE / 2,
   y: CANVAS_SIZE / 2,
+  width: 100,
+  height: fontSize,
   fill,
   rotation: 0,
   scaleX: 1,
   scaleY: 1,
+  zIndex,
   text,
   fontSize,
   fontFamily,
@@ -70,28 +71,32 @@ export const createTextElement = (
 
 export const createIconElement = (
   iconType: string,
-  fill: string
+  fill: string,
+  zIndex: number = 0
 ): EditorElement => ({
   id: generateId(),
   type: "text",
   x: CANVAS_SIZE / 2,
   y: CANVAS_SIZE / 2,
+  width: 48,
+  height: 48,
   fill,
   rotation: 0,
   scaleX: 1,
   scaleY: 1,
+  zIndex,
   text: ICON_MAP[iconType] || "●",
   fontSize: 48,
   fontFamily: "Arial",
-  iconType,
 });
 
 export const createBorderElement = (
   style: "solid" | "dashed" | "rounded" | "double",
-  stroke: string
+  stroke: string,
+  zIndex: number = 0
 ): EditorElement => ({
   id: generateId(),
-  type: "rect",
+  type: "border",
   x: CANVAS_SIZE / 2,
   y: CANVAS_SIZE / 2,
   width: CANVAS_SIZE - 40,
@@ -102,12 +107,14 @@ export const createBorderElement = (
   rotation: 0,
   scaleX: 1,
   scaleY: 1,
-  borderStyle: style === "rounded" ? "solid" : style,
+  zIndex,
+  borderStyle: style,
 });
 
 export const createImageElement = (
   img: HTMLImageElement,
-  imageSrc: string
+  imageSrc: string,
+  zIndex: number = 0
 ): EditorElement => {
   const aspectRatio = img.width / img.height;
   const maxSize = 150;
@@ -121,14 +128,20 @@ export const createImageElement = (
     y: CANVAS_SIZE / 2,
     width,
     height,
-    fill: "transparent",
     rotation: 0,
     scaleX: 1,
     scaleY: 1,
+    zIndex,
     imageSrc,
     imageElement: img,
   };
 };
 
 export const serializeElements = (elements: EditorElement[]) =>
-  elements.map((el) => ({ ...el, imageElement: undefined }));
+  elements.map((el) => {
+    if (el.type === "image") {
+      const { imageElement, ...rest } = el;
+      return rest;
+    }
+    return el;
+  });

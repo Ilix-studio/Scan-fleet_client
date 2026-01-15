@@ -1,6 +1,6 @@
 // constants/stickerEditor.ts
 
-import { DefaultTemplate, LanguageOption } from "./StickerEditor.types";
+import { DefaultTemplate, LanguageOption } from "@/types/stickerEditor.types";
 
 export const CANVAS_SIZE = 400;
 export const EXPORT_SIZE = 800;

@@ -7,8 +7,9 @@ import { Trash2, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { CanvasElement } from "./CanvasElement";
-import { EditorElement } from "../StickerEditor.types";
+
 import { CANVAS_SIZE, EXPORT_SIZE } from "../StickerEditor.contants";
+import { EditorElement } from "@/types/stickerEditor.types";
 
 export interface EditorCanvasHandle {
   getDataUrl: () => string | null;
