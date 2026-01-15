@@ -21,7 +21,7 @@ import adminAuthReducer from "./slices/adminAuthSlice";
 
 export type { AuthState } from "./slices/authSlice";
 export type { AdminAuthState } from "./slices/adminAuthSlice";
-export type { EditorState } from "./slices/editorSlice";
+
 export type { UIState } from "./slices/uiSlice";
 
 const indexedDBStorage = createIdbStorage("scanfleet-db");

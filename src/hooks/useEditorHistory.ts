@@ -3,15 +3,12 @@
 import { useState, useCallback } from "react";
 
 import { MAX_HISTORY } from "@/mainComponent/Features/StickerEditor.contants";
-import {
-  EditorElement,
-  HistoryState,
-} from "@/mainComponent/Features/StickerEditor.types";
+import { EditorElement } from "@/types/stickerEditor.types";
 
 export const useEditorHistory = () => {
-  const [history, setHistory] = useState<HistoryState[]>([
-    { elements: [], selectedId: null },
-  ]);
+  const [history, setHistory] = useState<
+    { elements: EditorElement[]; selectedId: string | null }[]
+  >([{ elements: [], selectedId: null }]);
   const [historyIndex, setHistoryIndex] = useState(0);
 
   const canUndo = historyIndex > 0;
