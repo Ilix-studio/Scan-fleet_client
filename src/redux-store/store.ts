@@ -17,8 +17,10 @@ import { baseApi } from "./services/baseApi";
 import authReducer from "./slices/authSlice";
 import editorReducer from "./slices/editorSlice";
 import uiReducer from "./slices/uiSlice";
+import adminAuthReducer from "./slices/adminAuthSlice";
 
 export type { AuthState } from "./slices/authSlice";
+export type { AdminAuthState } from "./slices/adminAuthSlice";
 export type { EditorState } from "./slices/editorSlice";
 export type { UIState } from "./slices/uiSlice";
 
@@ -28,12 +30,13 @@ const persistConfig = {
   key: "root",
   version: 1,
   storage: indexedDBStorage,
-  whitelist: ["auth"],
+  whitelist: ["auth", "adminAuth"],
 };
 
 const rootReducer = combineReducers({
   [baseApi.reducerPath]: baseApi.reducer,
   auth: authReducer,
+  adminAuth: adminAuthReducer,
   editor: editorReducer,
   ui: uiReducer,
 });

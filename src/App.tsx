@@ -8,6 +8,9 @@ import StickerEditor from "./mainComponent/Features/StickerEditor";
 import TokenDisplay from "./mainComponent/Pages/TokenDisplay";
 import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
+import AdminDashboardPage from "./mainComponent/Layout/Admin/AdminDashboardPage";
+import UserDashboardPage from "./mainComponent/Layout/Users/UserDashboardPage";
+import AdminLogin from "./mainComponent/Layout/Admin/AdminLogin";
 
 const App = () => {
   const location = useLocation();
@@ -86,7 +89,10 @@ const App = () => {
         <Route path='/login' element={<Login />} />
         <Route path='/decision-page' element={<DecisionPage />} />
         <Route path='/sticker-editor' element={<StickerEditor />} />
-        <Route path='/token-display' element={<TokenDisplay />} />
+        <Route path='/token-wallet' element={<TokenDisplay />} />
+        <Route path='/admin-dashboard' element={<AdminDashboardPage />} />
+        <Route path='/user-dashboard' element={<UserDashboardPage />} />
+        <Route path='/admin-login' element={<AdminLogin />} />
       </Routes>
     </>
   );
