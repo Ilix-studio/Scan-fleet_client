@@ -11,6 +11,7 @@ import { Toaster } from "react-hot-toast";
 import AdminDashboardPage from "./mainComponent/Layout/Admin/AdminDashboardPage";
 import UserDashboardPage from "./mainComponent/Layout/Users/UserDashboardPage";
 import AdminLogin from "./mainComponent/Layout/Admin/AdminLogin";
+import StickerProduct from "./mainComponent/Pages/StickerProduct";
 
 const App = () => {
   const location = useLocation();
@@ -86,13 +87,14 @@ const App = () => {
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/signup' element={<Signup />} />
+        <Route path='/admin-login' element={<AdminLogin />} />
         <Route path='/login' element={<Login />} />
         <Route path='/decision-page' element={<DecisionPage />} />
+        <Route path='/product-page' element={<StickerProduct />} />
         <Route path='/sticker-editor' element={<StickerEditor />} />
         <Route path='/token-wallet' element={<TokenDisplay />} />
         <Route path='/admin-dashboard' element={<AdminDashboardPage />} />
         <Route path='/user-dashboard' element={<UserDashboardPage />} />
-        <Route path='/admin-login' element={<AdminLogin />} />
       </Routes>
     </>
   );

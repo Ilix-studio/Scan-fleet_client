@@ -53,7 +53,7 @@ const Login = () => {
       // Step 3: Send to backend
       await userLogin({ idToken }).unwrap();
 
-      navigate("/dashboard");
+      navigate("/user-dashboard");
     } catch (err: any) {
       setFormError(err?.message || "Invalid credentials");
     }

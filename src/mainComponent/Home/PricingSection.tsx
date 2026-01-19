@@ -1,27 +1,15 @@
 import { Button } from "@/components/ui/button";
-import {
-  Check,
-  Package,
-  Infinity,
-  Home,
-  Shield,
-  MessageCircle,
-} from "lucide-react";
+import { Check, Package, Infinity, Home, MessageCircle } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const PricingSection = () => {
   const features = [
     {
       icon: Package,
       title: "6 Smart Stickers",
-      description:
-        "Each token generates 6 high-quality smart QR stickers with emergency features",
+      description: " 6 high-quality smart QR stickers with emergency features",
     },
-    {
-      icon: Shield,
-      title: "Emergency Services",
-      description:
-        "Integrated Police (100) & Ambulance (108) calling via Twilio",
-    },
+
     {
       icon: MessageCircle,
       title: "WhatsApp GPS Sharing",
@@ -68,14 +56,12 @@ const PricingSection = () => {
                 <span className='text-6xl sm:text-7xl font-bold bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 bg-clip-text text-transparent'>
                   ₹499
                 </span>
-                <p className='text-white/70 text-xl mt-2'>per token</p>
-                <p className='text-white/50 text-sm'>(₹499 + 18% GST)</p>
               </div>
 
               {/* Key Benefit */}
               <div className='bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-2xl p-6 mb-8'>
                 <p className='text-white font-semibold text-lg'>
-                  1 Token = 6 Smart Safety Stickers
+                  ₹499 = 6 Smart Safety Stickers
                 </p>
                 <p className='text-white/60 text-sm mt-1'>
                   Emergency services • GPS sharing • Dealer connectivity
@@ -83,15 +69,17 @@ const PricingSection = () => {
               </div>
 
               {/* CTA Button */}
-              <Button className='bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white border-0 px-12 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200'>
-                Order Smart Stickers
-              </Button>
+              <Link to='/product-page'>
+                <Button className='bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white border-0 px-12 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200'>
+                  Order Smart Stickers
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
 
         {/* Features Grid */}
-        <div className='grid md:grid-cols-3 lg:grid-cols-5 gap-6 mb-16'>
+        <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16'>
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
@@ -116,7 +104,7 @@ const PricingSection = () => {
           <div className='grid md:grid-cols-2 gap-8'>
             <div>
               <h4 className='font-semibold mb-4 text-cyan-400'>
-                For Dealerships (B2B)
+                For Dealerships
               </h4>
               <ul className='space-y-3 text-white/70'>
                 <li className='flex items-start gap-3'>
@@ -140,7 +128,7 @@ const PricingSection = () => {
             </div>
             <div>
               <h4 className='font-semibold mb-4 text-purple-400'>
-                Vehicle Safety (B2C)
+                Vehicle Safety
               </h4>
               <ul className='space-y-3 text-white/70'>
                 <li className='flex items-start gap-3'>
