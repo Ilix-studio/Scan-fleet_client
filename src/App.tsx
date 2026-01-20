@@ -12,6 +12,7 @@ import AdminDashboardPage from "./mainComponent/Layout/Admin/AdminDashboardPage"
 import UserDashboardPage from "./mainComponent/Layout/Users/UserDashboardPage";
 import AdminLogin from "./mainComponent/Layout/Admin/AdminLogin";
 import StickerProduct from "./mainComponent/Pages/StickerProduct";
+import FillDetails from "./mainComponent/Pages/FillDetails";
 
 const App = () => {
   const location = useLocation();
@@ -90,8 +91,10 @@ const App = () => {
         <Route path='/admin-login' element={<AdminLogin />} />
         <Route path='/login' element={<Login />} />
         <Route path='/decision-page' element={<DecisionPage />} />
-        <Route path='/product-page' element={<StickerProduct />} />
+        {/* sticker product */}
+        <Route path='/sticker-select' element={<StickerProduct />} />
         <Route path='/sticker-editor' element={<StickerEditor />} />
+        <Route path='/fill-details' element={<FillDetails />} />
         <Route path='/token-wallet' element={<TokenDisplay />} />
         <Route path='/admin-dashboard' element={<AdminDashboardPage />} />
         <Route path='/user-dashboard' element={<UserDashboardPage />} />

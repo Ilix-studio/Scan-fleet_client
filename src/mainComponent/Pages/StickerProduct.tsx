@@ -455,13 +455,11 @@ export default function StickerProduct() {
                     onClick={() => setCarQuantity(1)}
                     className='w-full bg-white/5 hover:bg-white/10 border-2 border-purple-400/50 hover:border-purple-400 text-white font-bold py-4 rounded-xl transition-all duration-200 relative overflow-hidden'
                   >
-                    <div className='absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg'>
-                      50% OFF
-                    </div>
                     <div className='flex flex-row items-center gap-1'>
                       <span className='text-base'>
-                        Add Car Stickers (4 pcs)
+                        + Add Car Stickers (4 pcs)
                       </span>
+
                       <div className='flex items-center gap-2 text-sm'>
                         <span className='text-white/40 line-through'>
                           ₹{carOriginalPrice}

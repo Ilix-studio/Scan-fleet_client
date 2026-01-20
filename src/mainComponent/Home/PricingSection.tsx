@@ -69,7 +69,7 @@ const PricingSection = () => {
               </div>
 
               {/* CTA Button */}
-              <Link to='/product-page'>
+              <Link to='/sticker-select'>
                 <Button className='bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white border-0 px-12 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200'>
                   Order Smart Stickers
                 </Button>
