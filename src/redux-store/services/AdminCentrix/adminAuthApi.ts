@@ -1,5 +1,4 @@
-// redux-store/services/adminAuthApi.ts (update with onQueryStarted)
-
+// src/redux-store/services/AdminCentrix/adminAuthApi.ts
 import { setAdminCredentials } from "@/redux-store/slices/adminAuthSlice";
 import { baseApi } from "../baseApi";
 
@@ -8,19 +7,13 @@ interface AdminLoginRequest {
   password: string;
 }
 
-interface AdminSignupRequest {
-  email: string;
-  password: string;
-  name: string;
-}
-
 interface AdminAuthResponse {
   token: string;
   admin: {
     id: string;
     name: string;
     email: string;
-    role: "SUPER_ADMIN" | "ADMIN";
+    role: "SUPER_ADMIN";
   };
 }
 
@@ -28,9 +21,9 @@ interface AdminUser {
   id: string;
   name: string;
   email: string;
-  role: "SUPER_ADMIN" | "ADMIN";
+  role: "SUPER_ADMIN";
   isActive: boolean;
-  firebaseUid: string;
+  lastLogin?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -44,22 +37,6 @@ interface GetUsersResponse {
 
 export const adminAuthApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    adminGoogleAuth: builder.mutation<AdminAuthResponse, void>({
-      query: () => ({
-        url: "/admin-auth/google",
-        method: "POST",
-      }),
-      onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setAdminCredentials(data));
-        } catch (err) {
-          // Error handling in component
-        }
-      },
-      invalidatesTags: ["Admin"],
-    }),
-
     adminLogin: builder.mutation<AdminAuthResponse, AdminLoginRequest>({
       query: (credentials) => ({
         url: "/admin-auth/login",
@@ -71,24 +48,7 @@ export const adminAuthApi = baseApi.injectEndpoints({
           const { data } = await queryFulfilled;
           dispatch(setAdminCredentials(data));
         } catch (err) {
-          // Error handling in component
-        }
-      },
-      invalidatesTags: ["Admin"],
-    }),
-
-    adminSignup: builder.mutation<AdminAuthResponse, AdminSignupRequest>({
-      query: (data) => ({
-        url: "/admin-auth/signup",
-        method: "POST",
-        body: data,
-      }),
-      onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
-        try {
-          const { data } = await queryFulfilled;
-          dispatch(setAdminCredentials(data));
-        } catch (err) {
-          // Error handling in component
+          console.error("Login error:", err);
         }
       },
       invalidatesTags: ["Admin"],
@@ -111,28 +71,15 @@ export const adminAuthApi = baseApi.injectEndpoints({
       GetUsersResponse,
       { page?: number; limit?: number }
     >({
-      query: ({ page = 1, limit = 20 }) => {
-        const params = new URLSearchParams({
-          page: page.toString(),
-          limit: limit.toString(),
-        });
-        return `/admin-auth/get-all-users?${params.toString()}`;
-      },
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.users.map(({ id }) => ({ type: "User" as const, id })),
-              { type: "User", id: "LIST" },
-            ]
-          : [{ type: "User", id: "LIST" }],
+      query: ({ page = 1, limit = 10 }) =>
+        `/admin-auth/get-all-users?page=${page}&limit=${limit}`,
+      providesTags: ["Admin"],
     }),
   }),
 });
 
 export const {
-  useAdminGoogleAuthMutation,
   useAdminLoginMutation,
-  useAdminSignupMutation,
   useAdminLogoutMutation,
   useGetCurrentAdminQuery,
   useGetAllUsersQuery,

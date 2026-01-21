@@ -1,4 +1,4 @@
-// components/AdminLogin.tsx
+// src/pages/AdminLogin.tsx
 import { useState, FormEvent, ChangeEvent } from "react";
 import { Eye, EyeOff, Mail, Lock, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -42,7 +42,10 @@ const AdminLogin = () => {
 
       navigate("/admin-dashboard");
     } catch (err: any) {
-      setFormError(err?.data?.message || err?.message || "Invalid credentials");
+      const errorMessage =
+        err?.data?.message || err?.message || "Invalid credentials";
+      setFormError(errorMessage);
+      console.error("Login error:", err);
     }
   };
 
