@@ -44,7 +44,7 @@ const Login = () => {
       const result = await signInWithEmailAndPassword(
         auth,
         formData.email,
-        formData.password
+        formData.password,
       );
 
       // Step 2: Get ID token
@@ -72,7 +72,7 @@ const Login = () => {
       // Step 3: Send token to backend for verification
       await userGoogleAuth({ idToken }).unwrap();
 
-      navigate("/dashboard");
+      navigate("/user-dashboard");
     } catch (err: any) {
       // Error handling remains the same
       if (err.code === "auth/popup-closed-by-user") {
@@ -83,7 +83,7 @@ const Login = () => {
         setFormError("Network error. Please check your connection");
       } else {
         setFormError(
-          err?.data?.message || err?.message || "Google authentication failed"
+          err?.data?.message || err?.message || "Google authentication failed",
         );
       }
     }
