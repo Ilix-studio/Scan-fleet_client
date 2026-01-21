@@ -13,7 +13,7 @@ interface StateWithAuth {
 }
 
 export const API_CONFIG = {
-  BASE_URL: "https://scanfleet-server-196058146900.europe-west1.run.app/api",
+  BASE_URL: "https://scan-fleet-01-196058146900.europe-west1.run.app/api",
 };
 
 const baseQuery = fetchBaseQuery({
@@ -35,7 +35,7 @@ const baseQuery = fetchBaseQuery({
 const baseQueryWithReauth = async (
   args: Parameters<typeof baseQuery>[0],
   api: BaseQueryApi,
-  extraOptions: Parameters<typeof baseQuery>[2]
+  extraOptions: Parameters<typeof baseQuery>[2],
 ) => {
   let result = await baseQuery(args, api, extraOptions);
 
@@ -51,7 +51,7 @@ const baseQueryWithReauth = async (
           body: { refreshToken },
         },
         api,
-        extraOptions
+        extraOptions,
       );
 
       if (refreshResult.data) {
