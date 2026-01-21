@@ -1,6 +1,7 @@
 // redux-store/services/authApi.ts
-import { baseApi } from "./baseApi";
-import { setCredentials } from "../slices/authSlice";
+
+import { setCredentials } from "@/redux-store/slices/authSlice";
+import { baseApi } from "../baseApi";
 
 interface LoginRequest {
   email: string;

@@ -18,6 +18,8 @@ import authReducer from "./slices/authSlice";
 import editorReducer from "./slices/editorSlice";
 import uiReducer from "./slices/uiSlice";
 import adminAuthReducer from "./slices/adminAuthSlice";
+import directOrderReducer from "./slices/directOrderSlice";
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 export type { AuthState } from "./slices/authSlice";
 export type { AdminAuthState } from "./slices/adminAuthSlice";
@@ -39,6 +41,7 @@ const rootReducer = combineReducers({
   adminAuth: adminAuthReducer,
   editor: editorReducer,
   ui: uiReducer,
+  directOrder: directOrderReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -59,3 +62,5 @@ setupListeners(store.dispatch);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
