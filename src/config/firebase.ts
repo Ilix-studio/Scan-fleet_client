@@ -23,7 +23,7 @@ export const auth = getAuth(app);
 export const analytics =
   typeof window !== "undefined" ? getAnalytics(app) : null;
 
-const googleProvider = new GoogleAuthProvider();
+export const googleProvider = new GoogleAuthProvider();
 
 export const signInWithGoogle = async (): Promise<UserCredential> => {
   return signInWithPopup(auth, googleProvider);

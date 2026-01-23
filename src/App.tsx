@@ -1,8 +1,8 @@
 import { Route, Routes, useLocation } from "react-router-dom";
 import "./App.css";
 import Home from "./mainComponent/Home/Home";
-import Signup from "./mainComponent/Pages/Signup";
-import Login from "./mainComponent/Pages/Login";
+import Signup from "./mainComponent/Pages/auth/Signup";
+import Login from "./mainComponent/Pages/auth/Login";
 import DecisionPage from "./mainComponent/Pages/DecisionPage";
 import StickerEditor from "./mainComponent/Features/StickerEditor";
 import TokenDisplay from "./mainComponent/Pages/TokenDisplay";
@@ -11,8 +11,9 @@ import { Toaster } from "react-hot-toast";
 import AdminDashboardPage from "./mainComponent/Layout/Admin/AdminDashboardPage";
 import UserDashboardPage from "./mainComponent/Layout/Users/UserDashboardPage";
 import AdminLogin from "./mainComponent/Layout/Admin/AdminLogin";
-import StickerProduct from "./mainComponent/Pages/StickerProduct";
-import FillDetails from "./mainComponent/Pages/FillDetails";
+import StickerProduct from "./mainComponent/Pages/sticker/StickerProduct";
+import FillDetails from "./mainComponent/Pages/sticker/FillDetails";
+import UpdateProfile from "./mainComponent/Layout/Users/UpdateProfile";
 
 const App = () => {
   const location = useLocation();
@@ -96,6 +97,10 @@ const App = () => {
         <Route path='/sticker-editor' element={<StickerEditor />} />
         <Route path='/fill-details' element={<FillDetails />} />
         <Route path='/token-wallet' element={<TokenDisplay />} />
+        <Route
+          path='/update-profile'
+          element={<UpdateProfile isOpen={false} onClose={() => {}} />}
+        />
         <Route path='/admin-dashboard' element={<AdminDashboardPage />} />
         <Route path='/user-dashboard' element={<UserDashboardPage />} />
       </Routes>

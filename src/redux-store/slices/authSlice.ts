@@ -10,6 +10,7 @@ interface User {
   dealerId?: string;
   tokensAvailable: number;
   createdAt: string;
+  role?: string;
 }
 
 // Export this interface so TypeScript can reference it in the store type
@@ -39,7 +40,7 @@ const authSlice = createSlice({
         user: User;
         accessToken: string;
         refreshToken: string;
-      }>
+      }>,
     ) => {
       state.user = action.payload.user;
       state.accessToken = action.payload.accessToken;
