@@ -96,9 +96,11 @@ const Footer = () => {
 
         {/* Copyright */}
         <div className='border-t border-white/10 pt-8 text-center text-sm text-white/60'>
-          <p>
-            &copy; {currentYear} ScanFleet Technologies. All rights reserved.
-          </p>
+          <Link to='/admin-login'>
+            <p>
+              &copy; {currentYear} ScanFleet Technologies. All rights reserved.
+            </p>
+          </Link>
         </div>
       </div>
     </footer>

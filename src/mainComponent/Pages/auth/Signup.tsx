@@ -22,7 +22,7 @@ const Signup = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [, setShowRoleModal] = useState(false);
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -81,12 +81,11 @@ const Signup = () => {
       const result = await signInWithPopup(auth, googleProvider);
       const idToken = await result.user.getIdToken();
 
-      const response = await googleAuth({ idToken }).unwrap();
-      if (response.user.role === "DIRECT_CUSTOMER") {
-        setShowRoleModal(true);
-      } else {
-        navigate("/user-dashboard");
-      }
+      await googleAuth({ idToken }).unwrap();
+      // Clear any previous session storage flags for a fresh start
+      sessionStorage.removeItem("roleModalSkipped");
+
+      navigate("/user-dashboard");
     } catch (err: any) {
       setError(err?.data?.message || "Google signup failed. Please try again.");
     }

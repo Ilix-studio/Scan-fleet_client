@@ -3,17 +3,19 @@ import "./App.css";
 import Home from "./mainComponent/Home/Home";
 import Signup from "./mainComponent/Pages/auth/Signup";
 import Login from "./mainComponent/Pages/auth/Login";
-import DecisionPage from "./mainComponent/Pages/DecisionPage";
+
 import StickerEditor from "./mainComponent/Features/StickerEditor";
 import TokenDisplay from "./mainComponent/Pages/TokenDisplay";
 import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import AdminDashboardPage from "./mainComponent/Layout/Admin/AdminDashboardPage";
-import UserDashboardPage from "./mainComponent/Layout/Users/UserDashboardPage";
+
 import AdminLogin from "./mainComponent/Layout/Admin/AdminLogin";
 import StickerProduct from "./mainComponent/Pages/sticker/StickerProduct";
 import FillDetails from "./mainComponent/Pages/sticker/FillDetails";
-import UpdateProfile from "./mainComponent/Layout/Users/UpdateProfile";
+import RentalDashboardPage from "./mainComponent/Layout/Dashboard/Profile/RentalDashboardPage";
+import DealerDashboardPage from "./mainComponent/Layout/Dashboard/Profile/DealerDashboardPage";
+import UserDashboardPage from "./mainComponent/Layout/Dashboard/Profile/UserDashboardPage";
 
 const App = () => {
   const location = useLocation();
@@ -91,18 +93,18 @@ const App = () => {
         <Route path='/signup' element={<Signup />} />
         <Route path='/admin-login' element={<AdminLogin />} />
         <Route path='/login' element={<Login />} />
-        <Route path='/decision-page' element={<DecisionPage />} />
+
+        {/* User dashboards - organized by role */}
+        <Route path='/user-dashboard' element={<UserDashboardPage />} />
+        <Route path='/dealer-dashboard' element={<DealerDashboardPage />} />
+        <Route path='/rental-dashboard' element={<RentalDashboardPage />} />
+        <Route path='/admin-dashboard' element={<AdminDashboardPage />} />
+
         {/* sticker product */}
         <Route path='/sticker-select' element={<StickerProduct />} />
         <Route path='/sticker-editor' element={<StickerEditor />} />
         <Route path='/fill-details' element={<FillDetails />} />
         <Route path='/token-wallet' element={<TokenDisplay />} />
-        <Route
-          path='/update-profile'
-          element={<UpdateProfile isOpen={false} onClose={() => {}} />}
-        />
-        <Route path='/admin-dashboard' element={<AdminDashboardPage />} />
-        <Route path='/user-dashboard' element={<UserDashboardPage />} />
       </Routes>
     </>
   );

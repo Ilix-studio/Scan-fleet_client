@@ -1,33 +1,37 @@
 // redux-store/slices/authSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+export type UserRole =
+  | "DEALERSHIP_OWNER"
+  | "DEALERSHIP_SALESMAN"
+  | "RENTAL_OWNER"
+  | "DIRECT_CUSTOMER";
+
+export type UserStatus = "ACTIVE" | "SUSPENDED" | "PENDING_VERIFICATION";
+
 interface User {
   id: string;
   email: string;
   name: string;
   phone: string;
-  userType: "dealer" | "common";
-  dealerId?: string;
-  tokensAvailable: number;
-  createdAt: string;
-  role?: string;
+  role: UserRole;
+  status: UserStatus;
+  businessName?: string;
+  walletBalance?: number;
+  createdAt?: string;
+  lastLogin?: string;
 }
 
-// Export this interface so TypeScript can reference it in the store type
 export interface AuthState {
   user: User | null;
-  accessToken: string | null;
-  refreshToken: string | null;
+  token: string | null;
   isAuthenticated: boolean;
-  loading: boolean;
 }
 
 const initialState: AuthState = {
   user: null,
-  accessToken: null,
-  refreshToken: null,
+  token: null,
   isAuthenticated: false,
-  loading: false,
 };
 
 const authSlice = createSlice({
@@ -36,50 +40,44 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (
       state,
-      action: PayloadAction<{
-        user: User;
-        accessToken: string;
-        refreshToken: string;
-      }>,
+      action: PayloadAction<{ user: User; token: string }>,
     ) => {
       state.user = action.payload.user;
-      state.accessToken = action.payload.accessToken;
-      state.refreshToken = action.payload.refreshToken;
+      state.token = action.payload.token;
       state.isAuthenticated = true;
     },
 
-    updateTokenBalance: (state, action: PayloadAction<number>) => {
+    updateUser: (state, action: PayloadAction<Partial<User>>) => {
       if (state.user) {
-        state.user.tokensAvailable = action.payload;
+        state.user = { ...state.user, ...action.payload };
+      }
+    },
+
+    updateWalletBalance: (state, action: PayloadAction<number>) => {
+      if (state.user) {
+        state.user.walletBalance = action.payload;
       }
     },
 
     logout: (state) => {
       state.user = null;
-      state.accessToken = null;
-      state.refreshToken = null;
+      state.token = null;
       state.isAuthenticated = false;
-    },
-
-    refreshAccessToken: (state, action: PayloadAction<string>) => {
-      state.accessToken = action.payload;
     },
   },
 });
 
-export const {
-  setCredentials,
-  updateTokenBalance,
-  logout,
-  refreshAccessToken,
-} = authSlice.actions;
+export const { setCredentials, updateUser, updateWalletBalance, logout } =
+  authSlice.actions;
 export default authSlice.reducer;
 
+// Selectors
 export const selectCurrentUser = (state: { auth: AuthState }) =>
   state.auth.user;
 export const selectIsAuthenticated = (state: { auth: AuthState }) =>
   state.auth.isAuthenticated;
-export const selectAccessToken = (state: { auth: AuthState }) =>
-  state.auth.accessToken;
-export const selectUserType = (state: { auth: AuthState }) =>
-  state.auth.user?.userType;
+export const selectToken = (state: { auth: AuthState }) => state.auth.token;
+export const selectUserRole = (state: { auth: AuthState }) =>
+  state.auth.user?.role;
+export const selectWalletBalance = (state: { auth: AuthState }) =>
+  state.auth.user?.walletBalance ?? 0;

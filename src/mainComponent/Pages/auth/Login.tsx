@@ -16,7 +16,6 @@ const Login = () => {
     email: "",
     password: "",
   });
-
   const [formError, setFormError] = useState<string | null>(null);
 
   const [userLogin, { isLoading }] = useUserLoginMutation();
@@ -25,10 +24,7 @@ const Login = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     setFormError(null);
   };
 
@@ -37,25 +33,19 @@ const Login = () => {
     setFormError(null);
 
     try {
-      // Step 1: Firebase client auth
-      const { signInWithEmailAndPassword } = await import("firebase/auth");
-      const { auth } = await import("@/config/firebase");
-
-      const result = await signInWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password,
-      );
-
-      // Step 2: Get ID token
-      const idToken = await result.user.getIdToken();
-
-      // Step 3: Send to backend
-      await userLogin({ idToken }).unwrap();
+      // Directly call your API with email and password
+      await userLogin({
+        email: formData.email,
+        password: formData.password,
+      }).unwrap();
 
       navigate("/user-dashboard");
     } catch (err: any) {
-      setFormError(err?.message || "Invalid credentials");
+      setFormError(
+        err?.data?.message ||
+          err?.message ||
+          "Login failed. Please check your credentials.",
+      );
     }
   };
 
@@ -63,35 +53,31 @@ const Login = () => {
     setFormError(null);
 
     try {
-      // Step 1: Firebase client authentication
       const result = await signInWithGoogle();
-
-      // Step 2: Get Firebase ID token
       const idToken = await result.user.getIdToken();
 
-      // Step 3: Send token to backend for verification
       await userGoogleAuth({ idToken }).unwrap();
 
       navigate("/user-dashboard");
     } catch (err: any) {
-      // Error handling remains the same
-      if (err.code === "auth/popup-closed-by-user") {
-        setFormError("Sign-in popup was closed");
-      } else if (err.code === "auth/cancelled-popup-request") {
-        setFormError("Sign-in cancelled");
-      } else if (err.code === "auth/network-request-failed") {
-        setFormError("Network error. Please check your connection");
-      } else {
-        setFormError(
-          err?.data?.message || err?.message || "Google authentication failed",
-        );
-      }
+      const errorCode = err?.code || "";
+      const errorMessage =
+        errorCode === "auth/popup-closed-by-user"
+          ? "Sign-in popup was closed"
+          : errorCode === "auth/cancelled-popup-request"
+            ? "Sign-in cancelled"
+            : errorCode === "auth/network-request-failed"
+              ? "Network error. Check your connection"
+              : err?.data?.message ||
+                err?.message ||
+                "Google authentication failed";
+
+      setFormError(errorMessage);
     }
   };
 
   return (
     <div className='min-h-screen flex items-center justify-center bg-black relative overflow-hidden'>
-      {/* Background Gradient */}
       <div
         className='absolute inset-0 z-0'
         style={{
@@ -106,13 +92,10 @@ const Login = () => {
       />
 
       <div className='relative z-10 w-full max-w-md px-6'>
-        {/* Login Card */}
         <div className='bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl'>
-          {/* Glow Effect */}
           <div className='absolute -inset-1 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-pink-500/20 rounded-3xl blur-xl opacity-50'></div>
 
           <div className='relative'>
-            {/* Logo */}
             <div className='text-center mb-8'>
               <div className='flex items-center justify-center gap-3 mb-4'>
                 <div className='relative'>
@@ -131,7 +114,6 @@ const Login = () => {
               <p className='text-white/60'>Sign in to your account</p>
             </div>
 
-            {/* Google Login Button */}
             <Button
               onClick={handleGoogleLogin}
               disabled={isGoogleLoading || isLoading}
@@ -173,7 +155,6 @@ const Login = () => {
               )}
             </Button>
 
-            {/* Divider */}
             <div className='relative mb-6'>
               <div className='absolute inset-0 flex items-center'>
                 <span className='w-full border-t border-white/20'></span>
@@ -185,14 +166,12 @@ const Login = () => {
               </div>
             </div>
 
-            {/* Error Message */}
             {formError && (
               <div className='mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl'>
                 <p className='text-red-400 text-sm text-center'>{formError}</p>
               </div>
             )}
 
-            {/* Login Form */}
             <form onSubmit={handleSubmit} className='space-y-4'>
               <div>
                 <label
@@ -260,7 +239,7 @@ const Login = () => {
 
               <Button
                 type='submit'
-                disabled={isLoading || isGoogleLoading}
+                disabled={isLoading}
                 className='w-full bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white border-0 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none'
               >
                 {isLoading ? (
@@ -274,7 +253,6 @@ const Login = () => {
               </Button>
             </form>
 
-            {/* Sign Up Link */}
             <div className='text-center mt-6'>
               <p className='text-white/60'>
                 Don't have an account?{" "}
