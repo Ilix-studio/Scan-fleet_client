@@ -7,6 +7,7 @@ import {
   useUserLogoutMutation,
 } from "@/redux-store/services/userAuthApi";
 import RoleReminderButton from "../Users/RoleReminderButton";
+import { useDispatch } from "react-redux";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -22,6 +23,7 @@ export default function DashboardLayout({
   onRoleReminderClick,
 }: DashboardLayoutProps) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { data: profile } = useGetUserProfileQuery();
   const [logout] = useUserLogoutMutation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -30,9 +32,12 @@ export default function DashboardLayout({
   const handleLogout = async () => {
     try {
       await logout().unwrap();
-      navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
+      // Even if the API call fails, we still want to clear the auth state
+      dispatch({ type: "auth/logout" });
+    } finally {
+      navigate("/login");
     }
   };
 

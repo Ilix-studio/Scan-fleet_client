@@ -1,164 +1,124 @@
-// redux-store/services/userAuthApi.ts (corrected userGoogleAuth mutation)
+// redux-store/services/userAuthApi.ts
 import { baseApi } from "./baseApi";
-import { setCredentials, logout } from "../slices/authSlice";
+import {
+  setCredentials,
+  logout,
+  UserRole,
+  UserStatus,
+} from "../slices/authSlice";
 
-interface UserLoginRequest {
-  idToken: string;
+// Request types
+interface EmailLoginRequest {
+  email: string;
+  password: string;
 }
 
-interface UserSignupRequest {
-  idToken: string;
-  name?: string;
-  phone?: string;
+interface EmailSignupRequest {
+  email: string;
+  password: string;
+  name: string;
+  phone: string;
+  role?: UserRole;
+  businessName?: string;
+  businessAddress?: string;
+  gstNumber?: string;
 }
 
 interface GoogleAuthRequest {
   idToken: string;
 }
 
-interface UserAuthResponse {
-  token: string;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-    phone: string;
-    role:
-      | "DEALERSHIP_OWNER"
-      | "DEALERSHIP_SALESMAN"
-      | "RENTAL_OWNER"
-      | "DIRECT_CUSTOMER";
-    status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
-  };
+interface UpdateRoleRequest {
+  role: UserRole;
 }
 
-interface UserProfile {
+// Response types
+interface UserData {
   id: string;
   email: string;
   name: string;
   phone: string;
-  role:
-    | "DEALERSHIP_OWNER"
-    | "DEALERSHIP_SALESMAN"
-    | "RENTAL_OWNER"
-    | "DIRECT_CUSTOMER";
-  status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
-  walletBalance: number;
+  role: UserRole;
+  status: UserStatus;
   lifetimeTokensPurchased: number;
-  lifetimeTokensUsed: number;
-  createdAt: string;
+  businessName?: string;
+  walletBalance?: number;
+  createdAt?: string;
+  lastLogin?: string;
 }
 
-interface UpdateProfileRequest {
-  name?: string;
-  phone?: string;
+interface AuthResponse {
+  token: string;
+  user: UserData;
 }
 
-interface UpdateRoleRequest {
-  role:
-    | "DEALERSHIP_OWNER"
-    | "DEALERSHIP_SALESMAN"
-    | "RENTAL_OWNER"
-    | "DIRECT_CUSTOMER";
+interface ProfileResponse {
+  success: boolean;
+  user: UserData;
+}
+
+interface UpdateRoleResponse {
+  success: boolean;
+  user: UserData;
+}
+
+interface LogoutResponse {
+  success: boolean;
+  message: string;
 }
 
 export const userAuthApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // FIXED: Changed from void to GoogleAuthRequest
-    userGoogleAuth: builder.mutation<UserAuthResponse, GoogleAuthRequest>({
-      query: (credentials) => ({
+    // Google OAuth
+    userGoogleAuth: builder.mutation<AuthResponse, GoogleAuthRequest>({
+      query: (body) => ({
         url: "/user-auth/google",
         method: "POST",
-        body: credentials, // Send idToken in request body
+        body,
       }),
       onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
         try {
           const { data } = await queryFulfilled;
-          dispatch(
-            setCredentials({
-              user: {
-                id: data.user.id,
-                email: data.user.email,
-                name: data.user.name,
-                phone: data.user.phone,
-                userType: "common",
-                tokensAvailable: 0,
-                createdAt: "",
-              },
-              accessToken: data.token,
-              refreshToken: data.token,
-            })
-          );
-        } catch (err) {
-          // Error handling in component
-        }
+          dispatch(setCredentials({ user: data.user, token: data.token }));
+        } catch {}
       },
       invalidatesTags: ["User"],
     }),
 
-    userLogin: builder.mutation<UserAuthResponse, UserLoginRequest>({
-      query: (credentials) => ({
+    // Email/Password Login
+    userLogin: builder.mutation<AuthResponse, EmailLoginRequest>({
+      query: (body) => ({
         url: "/user-auth/login",
         method: "POST",
-        body: credentials,
+        body,
       }),
       onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
         try {
           const { data } = await queryFulfilled;
-          dispatch(
-            setCredentials({
-              user: {
-                id: data.user.id,
-                email: data.user.email,
-                name: data.user.name,
-                phone: data.user.phone,
-                userType: "common",
-                tokensAvailable: 0,
-                createdAt: "",
-              },
-              accessToken: data.token,
-              refreshToken: data.token,
-            })
-          );
-        } catch (err) {
-          // Error handling in component
-        }
+          dispatch(setCredentials({ user: data.user, token: data.token }));
+        } catch {}
       },
       invalidatesTags: ["User"],
     }),
 
-    userSignup: builder.mutation<UserAuthResponse, UserSignupRequest>({
-      query: (data) => ({
+    // Email/Password Signup
+    userSignup: builder.mutation<AuthResponse, EmailSignupRequest>({
+      query: (body) => ({
         url: "/user-auth/signup",
         method: "POST",
-        body: data,
+        body,
       }),
       onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
         try {
           const { data } = await queryFulfilled;
-          dispatch(
-            setCredentials({
-              user: {
-                id: data.user.id,
-                email: data.user.email,
-                name: data.user.name,
-                phone: data.user.phone,
-                userType: "common",
-                tokensAvailable: 0,
-                createdAt: "",
-              },
-              accessToken: data.token,
-              refreshToken: data.token,
-            })
-          );
-        } catch (err) {
-          // Error handling in component
-        }
+          dispatch(setCredentials({ user: data.user, token: data.token }));
+        } catch {}
       },
       invalidatesTags: ["User"],
     }),
 
-    userLogout: builder.mutation<{ message: string }, void>({
+    // Logout
+    userLogout: builder.mutation<LogoutResponse, void>({
       query: () => ({
         url: "/user-auth/logout",
         method: "POST",
@@ -166,49 +126,30 @@ export const userAuthApi = baseApi.injectEndpoints({
       onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
         try {
           await queryFulfilled;
-          dispatch(logout());
-        } catch (err) {
+        } finally {
           dispatch(logout());
         }
+      },
+      // Don't retry on 401
+      extraOptions: {
+        retry: false,
       },
       invalidatesTags: ["User"],
     }),
 
-    getUserProfile: builder.query<UserProfile, void>({
+    // Get Profile
+    getUserProfile: builder.query<UserData, void>({
       query: () => "/user-auth/me",
+      transformResponse: (response: ProfileResponse) => response.user,
       providesTags: ["User"],
     }),
 
-    updateUserProfile: builder.mutation<UserProfile, UpdateProfileRequest>({
-      query: (data) => ({
-        url: "/user-auth/profile",
-        method: "PATCH",
-        body: data,
-      }),
-      onQueryStarted: async (updates, { dispatch, queryFulfilled }) => {
-        const patchResult = dispatch(
-          userAuthApi.util.updateQueryData(
-            "getUserProfile",
-            undefined,
-            (draft) => {
-              Object.assign(draft, updates);
-            }
-          )
-        );
-        try {
-          await queryFulfilled;
-        } catch {
-          patchResult.undo();
-        }
-      },
-      invalidatesTags: ["User"],
-    }),
-
-    updateUserRole: builder.mutation<UserAuthResponse, UpdateRoleRequest>({
-      query: (data) => ({
+    // Update Role
+    updateUserRole: builder.mutation<UpdateRoleResponse, UpdateRoleRequest>({
+      query: (body) => ({
         url: "/user-auth/role",
         method: "PATCH",
-        body: data,
+        body,
       }),
       invalidatesTags: ["User"],
     }),
@@ -221,6 +162,5 @@ export const {
   useUserSignupMutation,
   useUserLogoutMutation,
   useGetUserProfileQuery,
-  useUpdateUserProfileMutation,
   useUpdateUserRoleMutation,
 } = userAuthApi;
