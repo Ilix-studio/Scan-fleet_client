@@ -3,15 +3,6 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // import type { BaseQueryApi } from "@reduxjs/toolkit/query";
 // import { logout } from "../slices/authSlice";
 
-interface AuthState {
-  accessToken: string | null;
-  refreshToken: string | null;
-}
-
-interface StateWithAuth {
-  auth: AuthState;
-}
-
 export const API_CONFIG = {
   BASE_URL: "https://scan-fleet-01-196058146900.europe-west1.run.app/api",
 };
@@ -19,8 +10,9 @@ export const API_CONFIG = {
 const baseQuery = fetchBaseQuery({
   baseUrl: API_CONFIG.BASE_URL,
   prepareHeaders: (headers, { getState }) => {
-    const state = getState() as StateWithAuth;
-    const token = state.auth.accessToken;
+    // Prefer admin token if present, else fallback to user token
+    const state = getState() as any;
+    const token = state.adminAuth?.token || state.auth?.accessToken;
 
     if (token) {
       headers.set("authorization", `Bearer ${token}`);
@@ -87,6 +79,7 @@ export const baseApi = createApi({
     "User",
     "Token",
     "Sticker",
+    "StickerGarage",
     "Purchase",
     "Analytics",
     "ApiAccount",

@@ -33,6 +33,11 @@ export default function DashboardSidebar({ userType }: DashboardSidebarProps) {
       action: () => navigate("/admin-dashboard"),
     },
     {
+      label: "Create Tags",
+      icon: LayoutDashboard,
+      action: () => navigate("/admin-create-tags"),
+    },
+    {
       label: "User Management",
       icon: Users,
       action: () => navigate("/admin-user-management"),
