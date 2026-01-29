@@ -6,7 +6,8 @@ import DashboardLayout from "../DashboardLayout";
 import DashboardSidebar from "../DashboardSidebar";
 import { directCustomerNavigation } from "../dashboardNavigation";
 import UpdateProfile from "../../Users/UpdateProfile";
-import { Minus, Plus } from "lucide-react";
+
+import ProductCards from "@/mainComponent/Features/ProductCard/ProductCards";
 
 export const Icon = ({ className, ...rest }: any) => {
   return (
@@ -122,45 +123,7 @@ export default function UserDashboardPage() {
             </div>
           </div>
         </div>
-        <br />
-        <div className='flex gap-4 items-center justify-center h-[30rem] w-full max-w-[1200px] mx-auto bg-black'>
-          <div className='border border-white/[0.2] dark:border-white/[0.2] flex flex-col items-start max-w-sm mx-auto p-4 relative h-[30rem]'>
-            <div>
-              <Plus className='absolute h-6 w-6 -top-3 -left-3 text-white' />
-              <Plus className='absolute h-6 w-6 -bottom-3 -left-3 text-white' />
-              <Plus className='absolute h-6 w-6 -top-3 -right-3 text-white' />
-              <Plus className='absolute h-6 w-6 -bottom-3 -right-3 text-white' />
-
-              <h2 className='dark:text-white text-black mt-4 text-sm font-light'>
-                Hover over this card to reveal an awesome effect. Running out of
-                copy here.
-              </h2>
-              <p className='text-sm border font-light dark:border-white/[0.2] border-black/[0.2] rounded-full mt-4 text-black dark:text-white px-2 py-0.5'>
-                Watch me hover
-              </p>
-            </div>
-            <button className='mt-4 bg-white/5 border border-white/10 rounded-xl p-2'>
-              Default Sticker
-            </button>
-          </div>
-          <div className='border border-white/[0.2] dark:border-white/[0.2] flex flex-col items-start max-w-sm mx-auto p-4 relative h-[30rem]'>
-            <Minus className='absolute h-6 w-6 -top-3 -left-3 text-white' />
-            <Minus className='absolute h-6 w-6 -bottom-3 -left-3 text-white' />
-            <Minus className='absolute h-6 w-6 -top-3 -right-3 text-white' />
-            <Minus className='absolute h-6 w-6 -bottom-3 -right-3 text-white' />
-
-            <h2 className='dark:text-white text-black mt-4 text-sm font-light'>
-              Hover over this card to reveal an awesome effect. Running out of
-              copy here.
-            </h2>
-            <p className='text-sm border font-light dark:border-white/[0.2] border-black/[0.2] rounded-full mt-4 text-black dark:text-white px-2 py-0.5'>
-              Watch me hover
-            </p>
-            <button className='mt-4 bg-white/5 border border-white/10 rounded-xl p-2'>
-              Default Sticker
-            </button>
-          </div>
-        </div>
+        <ProductCards />
       </DashboardLayout>
 
       <UpdateProfile
