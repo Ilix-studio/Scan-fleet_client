@@ -24,14 +24,14 @@ export default function DealerDashboardPage() {
   // This is a beautiful example of role-based rendering
   // We select the appropriate navigation based on whether they're an owner or salesman
   const navigation =
-    profile?.role === "DEALERSHIP_OWNER"
-      ? dealershipOwnerNavigation
-      : dealershipSalesmanNavigation;
+    profile?.role === "DEALERSHIP_SALESMAN"
+      ? dealershipSalesmanNavigation
+      : dealershipOwnerNavigation;
 
   const dashboardTitle =
-    profile?.role === "DEALERSHIP_OWNER"
-      ? "Dealership Management"
-      : "Salesman Dashboard";
+    profile?.role === "DEALERSHIP_SALESMAN"
+      ? "Salesman Dashboard"
+      : "Dealership Management";
 
   return (
     <DashboardLayout sidebar={<DashboardSidebar navigation={navigation} />}>

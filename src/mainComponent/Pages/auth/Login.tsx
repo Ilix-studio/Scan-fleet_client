@@ -10,6 +10,17 @@ import {
 import { signInWithGoogle } from "@/config/firebase";
 
 const Login = () => {
+  const getDashboardPath = (role: string) => {
+    switch (role) {
+      case "DEALERSHIP_OWNER":
+      case "DEALERSHIP_SALESMAN":
+        return "/dealer-dashboard";
+      case "RENTAL_OWNER":
+        return "/rental-dashboard";
+      default:
+        return "/user-dashboard";
+    }
+  };
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -34,12 +45,12 @@ const Login = () => {
 
     try {
       // Directly call your API with email and password
-      await userLogin({
+      const { user } = await userLogin({
         email: formData.email,
         password: formData.password,
       }).unwrap();
 
-      navigate("/user-dashboard");
+      navigate(getDashboardPath(user.role));
     } catch (err: any) {
       setFormError(
         err?.data?.message ||
@@ -56,9 +67,9 @@ const Login = () => {
       const result = await signInWithGoogle();
       const idToken = await result.user.getIdToken();
 
-      await userGoogleAuth({ idToken }).unwrap();
+      const { user } = await userGoogleAuth({ idToken }).unwrap();
 
-      navigate("/user-dashboard");
+      navigate(getDashboardPath(user.role));
     } catch (err: any) {
       const errorCode = err?.code || "";
       const errorMessage =

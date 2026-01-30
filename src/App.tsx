@@ -17,6 +17,7 @@ import RentalDashboardPage from "./mainComponent/Layout/Dashboard/Profile/Rental
 import DealerDashboardPage from "./mainComponent/Layout/Dashboard/Profile/DealerDashboardPage";
 import UserDashboardPage from "./mainComponent/Layout/Dashboard/Profile/UserDashboardPage";
 import AdminCreateTags from "./mainComponent/Layout/Admin/AdminCreateTags";
+import StickerStyle from "./mainComponent/Features/ProductCard/StickerStyle";
 
 const App = () => {
   const location = useLocation();
@@ -100,6 +101,7 @@ const App = () => {
         <Route path='/dealer-dashboard' element={<DealerDashboardPage />} />
         <Route path='/rental-dashboard' element={<RentalDashboardPage />} />
         <Route path='/admin-dashboard' element={<AdminDashboardPage />} />
+        <Route path='/sticker-style' element={<StickerStyle />} />
 
         {/* Admin dashboards */}
         <Route path='/admin-create-tags' element={<AdminCreateTags />} />
