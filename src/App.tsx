@@ -18,6 +18,7 @@ import DealerDashboardPage from "./mainComponent/Layout/Dashboard/Profile/Dealer
 import UserDashboardPage from "./mainComponent/Layout/Dashboard/Profile/UserDashboardPage";
 import AdminCreateTags from "./mainComponent/Layout/Admin/AdminCreateTags";
 import StickerStyle from "./mainComponent/Features/ProductCard/StickerStyle";
+import WalletDisplay from "./mainComponent/Pages/WalletDisplay";
 
 const App = () => {
   const location = useLocation();
@@ -99,6 +100,7 @@ const App = () => {
         {/* User dashboards - organized by role */}
         <Route path='/user-dashboard' element={<UserDashboardPage />} />
         <Route path='/dealer-dashboard' element={<DealerDashboardPage />} />
+
         <Route path='/rental-dashboard' element={<RentalDashboardPage />} />
         <Route path='/admin-dashboard' element={<AdminDashboardPage />} />
         <Route path='/sticker-style' element={<StickerStyle />} />
@@ -110,7 +112,8 @@ const App = () => {
         <Route path='/sticker-select' element={<StickerProduct />} />
         <Route path='/sticker-editor' element={<StickerEditor />} />
         <Route path='/fill-details' element={<FillDetails />} />
-        <Route path='/token-wallet' element={<TokenDisplay />} />
+        <Route path='/purchase-token' element={<TokenDisplay />} />
+        <Route path='/wallet' element={<WalletDisplay />} />
       </Routes>
     </>
   );

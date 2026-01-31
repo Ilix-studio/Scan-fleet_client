@@ -39,7 +39,7 @@ export const dealershipOwnerNavigation: NavigationSection[] = [
       {
         label: "Analytics",
         icon: BarChart3,
-        path: "/dealer-dashboard/analytics",
+        path: "/purchase-token",
       },
     ],
   },
@@ -49,7 +49,7 @@ export const dealershipOwnerNavigation: NavigationSection[] = [
       {
         label: "Wallet",
         icon: Wallet,
-        path: "/dealer-dashboard/wallet",
+        path: "/wallet",
         description: "View balance and purchase tokens",
       },
       {
