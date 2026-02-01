@@ -61,7 +61,7 @@ const PricingSection = () => {
               {/* Key Benefit */}
               <div className='bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-2xl p-6 mb-8'>
                 <p className='text-white font-semibold text-lg'>
-                  ₹499 = 6 Smart Safety Stickers
+                  ₹499 = 4 Smart Safety Stickers
                 </p>
                 <p className='text-white/60 text-sm mt-1'>
                   Emergency services • GPS sharing • Dealer connectivity
