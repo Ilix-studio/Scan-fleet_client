@@ -24,7 +24,7 @@ export default function DealerDashboardPage() {
   // This is a beautiful example of role-based rendering
   // We select the appropriate navigation based on whether they're an owner or salesman
   const navigation =
-    profile?.role === "DEALERSHIP_OWNER"
+    profile?.role?.trim().toUpperCase() === "DEALERSHIP_OWNER"
       ? dealershipOwnerNavigation
       : dealershipSalesmanNavigation;
 
