@@ -13,6 +13,7 @@ import {
   Settings,
   BarChart3,
   LucideIcon,
+  BadgeHelp,
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -37,8 +38,8 @@ export const dealershipOwnerNavigation: NavigationSection[] = [
     items: [
       { label: "Dashboard", icon: Home, path: "/dealer-dashboard" },
       {
-        label: "Analytics",
-        icon: BarChart3,
+        label: "What is Token?",
+        icon: BadgeHelp,
         path: "/purchase-token",
       },
     ],
