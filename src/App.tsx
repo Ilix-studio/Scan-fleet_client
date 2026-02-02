@@ -18,7 +18,8 @@ import DealerDashboardPage from "./mainComponent/Layout/Dashboard/Profile/Dealer
 import UserDashboardPage from "./mainComponent/Layout/Dashboard/Profile/UserDashboardPage";
 import AdminCreateTags from "./mainComponent/Layout/Admin/AdminCreateTags";
 import StickerStyle from "./mainComponent/Features/ProductCard/StickerStyle";
-import WalletDisplay from "./mainComponent/Pages/WalletDisplay";
+
+import WalletPage from "./mainComponent/Pages/dashboard/shared/WalletPage";
 
 const App = () => {
   const location = useLocation();
@@ -113,7 +114,7 @@ const App = () => {
         <Route path='/sticker-editor' element={<StickerEditor />} />
         <Route path='/fill-details' element={<FillDetails />} />
         <Route path='/purchase-token' element={<TokenDisplay />} />
-        <Route path='/wallet' element={<WalletDisplay />} />
+        <Route path='/wallet' element={<WalletPage />} />
       </Routes>
     </>
   );
