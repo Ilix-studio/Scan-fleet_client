@@ -64,9 +64,11 @@ const Signup = () => {
 
     try {
       await signup({
-        idToken: "", // Email/password signup - backend will handle Firebase creation
+        email: formData.email,
+        password: formData.password,
         name: `${formData.firstName} ${formData.lastName}`,
         phone: formData.phone,
+        businessName: formData.businessName,
       }).unwrap();
 
       navigate("/update-profile");

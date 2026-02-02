@@ -1,4 +1,4 @@
-import DashboardSidebar from "../DashboardSidebar";
+import DashboardSidebar from "../AdminDashboardSidebar";
 import AdminDashboard from "./Admin-dashboard";
 
 export default function AdminDashboardPage() {

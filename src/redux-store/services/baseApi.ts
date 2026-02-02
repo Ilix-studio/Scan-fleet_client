@@ -12,7 +12,7 @@ const baseQuery = fetchBaseQuery({
   prepareHeaders: (headers, { getState }) => {
     // Prefer admin token if present, else fallback to user token
     const state = getState() as any;
-    const token = state.adminAuth?.token || state.auth?.accessToken;
+    const token = state.adminAuth?.token || state.auth?.token;
 
     if (token) {
       headers.set("authorization", `Bearer ${token}`);
