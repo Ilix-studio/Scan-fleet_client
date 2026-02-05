@@ -1,4 +1,4 @@
-// src/components/WalletDisplay.tsx
+// frontend/src/components/WalletDisplay.tsx
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,35 @@ import {
 import toast from "react-hot-toast";
 import { cn } from "@/lib/utils";
 
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+  }
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  handler: (response: RazorpayResponse) => void;
+  prefill?: { name?: string; email?: string };
+  theme?: { color?: string };
+  modal?: { ondismiss?: () => void };
+}
+
+interface RazorpayResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+interface RazorpayInstance {
+  open(): void;
+}
+
 const TOKEN_PACKAGES = [
   { quantity: 10, label: "Starter", popular: false },
   { quantity: 25, label: "Growth", popular: true },
@@ -37,31 +66,55 @@ const ROLE_PRICING: Record<string, number> = {
   DIRECT_CUSTOMER: 399,
 };
 
+const MAX_TOKEN_QUANTITY = 1000;
+
 export default function WalletDisplay() {
   const [selectedQuantity, setSelectedQuantity] = useState(25);
   const [customQuantity, setCustomQuantity] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const { data: profile } = useGetUserProfileQuery();
-  const { data: purchaseHistory, isLoading: historyLoading } =
-    useGetPurchaseHistoryQuery({ page: 1, limit: 5 });
+  const { data: profile, refetch: refetchProfile } = useGetUserProfileQuery();
+  const {
+    data: purchaseHistory,
+    isLoading: historyLoading,
+    refetch: refetchHistory,
+  } = useGetPurchaseHistoryQuery({ page: 1, limit: 5 });
 
   const [createOrder] = useCreateOrderMutation();
   const [verifyPayment] = useVerifyPaymentMutation();
 
-  const pricePerToken = ROLE_PRICING[profile?.role ?? "DIRECT_CUSTOMER"] ?? 399;
-  const walletBalance = profile?.walletBalance ?? 0;
-  const walletValue = walletBalance * pricePerToken;
-  const lifetimePurchased = profile?.lifetimeTokensPurchased ?? 0;
+  // FIX #1: Validate role pricing
+  const userRole = profile?.role;
+  const pricePerToken =
+    userRole && userRole in ROLE_PRICING ? ROLE_PRICING[userRole] : null;
 
-  const getQuantity = () => {
-    const custom = parseInt(customQuantity);
-    return custom > 0 ? custom : selectedQuantity;
+  const walletBalance = profile?.walletBalance ?? 0;
+  const lifetimePurchased = profile?.lifetimeTokensPurchased ?? 0;
+  // FIX #2: Correct field for used tokens
+  const lifetimeUsed = profile?.lifetimeTokensPurchased ?? 0;
+
+  const walletValue = pricePerToken ? walletBalance * pricePerToken : 0;
+  const usagePercent =
+    lifetimePurchased > 0
+      ? Math.round((lifetimeUsed / lifetimePurchased) * 100)
+      : 0;
+
+  // FIX #3: Proper quantity validation
+  const getQuantity = (): number => {
+    const custom = Number(customQuantity);
+    if (
+      Number.isInteger(custom) &&
+      custom > 0 &&
+      custom <= MAX_TOKEN_QUANTITY
+    ) {
+      return custom;
+    }
+    return selectedQuantity;
   };
 
   const loadRazorpayScript = (): Promise<boolean> => {
     return new Promise((resolve) => {
-      if ((window as any).Razorpay) {
+      if (window.Razorpay) {
         resolve(true);
         return;
       }
@@ -75,41 +128,57 @@ export default function WalletDisplay() {
   };
 
   const handlePurchase = async () => {
+    // Validate price exists
+    if (!pricePerToken) {
+      toast.error("Invalid user role. Contact support.");
+      return;
+    }
+
     const quantity = getQuantity();
-    if (quantity < 1) {
-      toast.error("Select at least 1 token");
+    if (quantity < 1 || quantity > MAX_TOKEN_QUANTITY) {
+      toast.error(`Quantity must be between 1 and ${MAX_TOKEN_QUANTITY}`);
       return;
     }
 
     try {
       setIsProcessing(true);
 
+      // FIX #4: Load script BEFORE creating order
       const loaded = await loadRazorpayScript();
       if (!loaded) {
         toast.error("Failed to load payment gateway");
+        setIsProcessing(false);
         return;
       }
 
-      const orderData = await createOrder({ tokenQuantity: quantity }).unwrap();
+      const response = await createOrder({ tokenQuantity: quantity }).unwrap();
+      const orderData = (response as any).data ?? response;
 
-      const options = {
+      if (!orderData?.orderId || !orderData?.keyId) {
+        throw new Error("Invalid order response");
+      }
+
+      const options: RazorpayOptions = {
         key: orderData.keyId,
         amount: orderData.amount,
         currency: orderData.currency,
         name: "ScanFleet",
         description: `${quantity} Token${quantity > 1 ? "s" : ""} Purchase`,
         order_id: orderData.orderId,
-        handler: async (response: any) => {
+        handler: async (rzpResponse: RazorpayResponse) => {
           try {
             const result = await verifyPayment({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
+              razorpay_order_id: rzpResponse.razorpay_order_id,
+              razorpay_payment_id: rzpResponse.razorpay_payment_id,
+              razorpay_signature: rzpResponse.razorpay_signature,
             }).unwrap();
 
             toast.success(
               `${result.data.tokensAdded} token${result.data.tokensAdded > 1 ? "s" : ""} added!`,
             );
+
+            // FIX #5: Refetch data after successful payment
+            await Promise.all([refetchProfile(), refetchHistory()]);
           } catch {
             toast.error("Payment verification failed");
           } finally {
@@ -129,17 +198,28 @@ export default function WalletDisplay() {
         },
       };
 
-      const razorpay = new (window as any).Razorpay(options);
+      const razorpay = new window.Razorpay(options);
       razorpay.open();
-    } catch (err: any) {
-      toast.error(err?.data?.message ?? "Failed to initiate payment");
+    } catch (err: unknown) {
+      const error = err as { data?: { message?: string } };
+      toast.error(error?.data?.message ?? "Failed to initiate payment");
       setIsProcessing(false);
     }
   };
 
+  // Show error if pricing unavailable
+  if (profile && !pricePerToken) {
+    return (
+      <div className='flex items-center justify-center min-h-screen bg-black'>
+        <p className='text-red-500'>
+          Invalid account configuration. Contact support.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className='space-y-6 bg-black min-h-screen p-6 max-w-7xl mx-auto container'>
-      {/* Header */}
       <div>
         <h1 className='text-3xl font-bold text-white mb-2'>Token Wallet</h1>
         <p className='text-white/60'>
@@ -147,12 +227,10 @@ export default function WalletDisplay() {
         </p>
       </div>
 
-      {/* Balance Card */}
-      <Card className='bg-white/5 backdrop-blur-xl border border-white/10 overflow-hidden'>
+      <Card className='bg-white/5 backdrop-blur-xl border border-white/10 overflow-hidden relative'>
         <div className='absolute inset-0 bg-gradient-to-br from-cyan-500/10 via-purple-500/10 to-pink-500/10' />
         <CardContent className='relative p-8'>
           <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
-            {/* Main Balance */}
             <div className='lg:col-span-2'>
               <div className='flex items-start gap-4 mb-6'>
                 <div className='p-3 rounded-xl bg-cyan-500/20 border border-cyan-400/30'>
@@ -171,7 +249,6 @@ export default function WalletDisplay() {
                 </div>
               </div>
 
-              {/* Stats Row */}
               <div className='grid grid-cols-3 gap-4'>
                 <div className='bg-white/5 rounded-lg p-4 border border-white/10'>
                   <div className='flex items-center gap-2 mb-2'>
@@ -187,6 +264,9 @@ export default function WalletDisplay() {
                     <ArrowUpRight className='text-orange-400' size={16} />
                     <span className='text-white/60 text-xs'>Used</span>
                   </div>
+                  <p className='text-xl font-semibold text-white'>
+                    {lifetimeUsed.toLocaleString()}
+                  </p>
                 </div>
                 <div className='bg-white/5 rounded-lg p-4 border border-white/10'>
                   <div className='flex items-center gap-2 mb-2'>
@@ -194,13 +274,12 @@ export default function WalletDisplay() {
                     <span className='text-white/60 text-xs'>Rate</span>
                   </div>
                   <p className='text-xl font-semibold text-white'>
-                    ₹{pricePerToken}
+                    ₹{pricePerToken ?? "—"}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Usage Progress */}
             <div className='flex flex-col justify-center'>
               <div className='bg-white/5 rounded-xl p-6 border border-white/10'>
                 <p className='text-white/60 text-sm mb-4'>Token Usage</p>
@@ -218,6 +297,7 @@ export default function WalletDisplay() {
                       stroke='url(#gradient)'
                       strokeWidth='3'
                       strokeLinecap='round'
+                      strokeDasharray={`${usagePercent}, 100`}
                     />
                     <defs>
                       <linearGradient id='gradient'>
@@ -227,6 +307,9 @@ export default function WalletDisplay() {
                     </defs>
                   </svg>
                   <div className='absolute inset-0 flex flex-col items-center justify-center'>
+                    <span className='text-2xl font-bold text-white'>
+                      {usagePercent}%
+                    </span>
                     <span className='text-white/60 text-xs'>used</span>
                   </div>
                 </div>
@@ -237,7 +320,6 @@ export default function WalletDisplay() {
       </Card>
 
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-        {/* Purchase Section */}
         <div className='lg:col-span-2'>
           <Card className='bg-white/5 backdrop-blur-xl border border-white/10'>
             <CardHeader>
@@ -247,7 +329,6 @@ export default function WalletDisplay() {
               </CardTitle>
             </CardHeader>
             <CardContent className='space-y-6'>
-              {/* Package Selection */}
               <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
                 {TOKEN_PACKAGES.map((pkg) => (
                   <button
@@ -273,36 +354,41 @@ export default function WalletDisplay() {
                     </p>
                     <p className='text-xs text-white/60'>{pkg.label}</p>
                     <p className='text-sm text-cyan-400 mt-1'>
-                      ₹{(pkg.quantity * pricePerToken).toLocaleString()}
+                      ₹
+                      {pricePerToken
+                        ? (pkg.quantity * pricePerToken).toLocaleString()
+                        : "—"}
                     </p>
                   </button>
                 ))}
               </div>
 
-              {/* Custom Quantity */}
               <div>
                 <label className='block text-sm text-white/60 mb-2'>
-                  Or enter custom quantity
+                  Or enter custom quantity (max {MAX_TOKEN_QUANTITY})
                 </label>
                 <div className='flex gap-3'>
                   <input
                     type='number'
                     min='1'
+                    max={MAX_TOKEN_QUANTITY}
                     value={customQuantity}
                     onChange={(e) => setCustomQuantity(e.target.value)}
                     placeholder='Enter quantity'
                     className='flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-400/50'
                   />
                   <div className='px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white min-w-[120px] text-center'>
-                    ₹{(getQuantity() * pricePerToken).toLocaleString()}
+                    ₹
+                    {pricePerToken
+                      ? (getQuantity() * pricePerToken).toLocaleString()
+                      : "—"}
                   </div>
                 </div>
               </div>
 
-              {/* Purchase Button */}
               <Button
                 onClick={handlePurchase}
-                disabled={isProcessing}
+                disabled={isProcessing || !pricePerToken}
                 className='w-full h-12 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white border-0 text-lg font-semibold'
               >
                 {isProcessing ? (
@@ -313,7 +399,9 @@ export default function WalletDisplay() {
                 ) : (
                   <>
                     Buy {getQuantity()} Tokens for ₹
-                    {(getQuantity() * pricePerToken).toLocaleString()}
+                    {pricePerToken
+                      ? (getQuantity() * pricePerToken).toLocaleString()
+                      : "—"}
                   </>
                 )}
               </Button>
@@ -325,7 +413,6 @@ export default function WalletDisplay() {
           </Card>
         </div>
 
-        {/* Recent Transactions */}
         <Card className='bg-white/5 backdrop-blur-xl border border-white/10'>
           <CardHeader>
             <CardTitle className='flex items-center gap-2 text-white text-base'>

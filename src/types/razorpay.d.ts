@@ -5,6 +5,7 @@ export interface CreateOrderRequest {
 }
 
 export interface CreateOrderResponse {
+  [x: string]: any;
   purchaseId: string;
   orderId: string;
   amount: number;

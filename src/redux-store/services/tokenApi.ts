@@ -13,7 +13,7 @@ interface TokenPackage {
 
 interface PurchaseRequest {
   packageId: string;
-  paymentMethod: "razorpay" | "stripe";
+  paymentMethod: "razorpay";
 }
 
 interface PurchaseResponse {

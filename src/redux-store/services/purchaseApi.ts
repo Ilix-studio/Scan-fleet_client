@@ -17,6 +17,11 @@ export const purchaseApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      // Transform to extract data
+      transformResponse: (response: {
+        success: boolean;
+        data: CreateOrderResponse;
+      }) => response.data,
     }),
 
     verifyPayment: builder.mutation<
