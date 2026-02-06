@@ -5,7 +5,7 @@ import Signup from "./mainComponent/Pages/auth/Signup";
 import Login from "./mainComponent/Pages/auth/Login";
 
 import StickerEditor from "./mainComponent/Features/StickerEditor";
-import TokenDisplay from "./mainComponent/Pages/TokenDisplay";
+
 import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 import AdminDashboardPage from "./mainComponent/Layout/Admin/AdminDashboardPage";
@@ -21,6 +21,9 @@ import StickerStyle from "./mainComponent/Features/ProductCard/StickerStyle";
 
 import WalletPage from "./mainComponent/Pages/dashboard/shared/WalletPage";
 import NotFound from "./mainComponent/Home/NotFound";
+import TokenDisplayPage from "./mainComponent/Pages/dashboard/shared/TokenDisplayPage";
+import PurchaseHistoryPage from "./mainComponent/Pages/dashboard/shared/PurchaseHistoryPage";
+import UseTokenPage from "./mainComponent/Pages/dashboard/shared/UseTokenPage";
 
 const App = () => {
   const location = useLocation();
@@ -114,8 +117,10 @@ const App = () => {
         <Route path='/sticker-select' element={<StickerProduct />} />
         <Route path='/sticker-editor' element={<StickerEditor />} />
         <Route path='/fill-details' element={<FillDetails />} />
-        <Route path='/purchase-token' element={<TokenDisplay />} />
+        <Route path='/purchase-token' element={<TokenDisplayPage />} />
         <Route path='/wallet' element={<WalletPage />} />
+        <Route path='/purchase-history' element={<PurchaseHistoryPage />} />
+        <Route path='/use-token' element={<UseTokenPage />} />
         <Route path='*' element={<NotFound />} />
       </Routes>
     </>

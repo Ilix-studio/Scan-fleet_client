@@ -56,12 +56,12 @@ export const dealershipOwnerNavigation: NavigationSection[] = [
       {
         label: "Purchase History",
         icon: ShoppingCart,
-        path: "/dealer-dashboard/purchases",
+        path: "/purchase-history",
       },
       {
         label: "Token Usage",
         icon: TrendingUp,
-        path: "/dealer-dashboard/usage",
+        path: "/use-token",
       },
     ],
   },

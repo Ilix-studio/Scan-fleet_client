@@ -74,7 +74,7 @@ export default function TokenDisplay() {
             toast.success(
               `${result.data.tokensAdded} token${
                 result.data.tokensAdded > 1 ? "s" : ""
-              } added to your wallet`
+              } added to your wallet`,
             );
           } catch (error: any) {
             toast.error(error?.data?.message || "Payment verification failed");
