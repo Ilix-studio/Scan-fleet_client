@@ -6,14 +6,12 @@ import {
   Wallet,
   Plus,
   TrendingUp,
-  Clock,
-  CheckCircle2,
-  XCircle,
   ArrowUpRight,
   ArrowDownRight,
-  History,
   RefreshCw,
+  AlertCircle,
 } from "lucide-react";
+
 import { useGetUserProfileQuery } from "@/redux-store/services/userAuthApi";
 import {
   useCreateOrderMutation,
@@ -74,11 +72,10 @@ export default function WalletDisplay() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const { data: profile, refetch: refetchProfile } = useGetUserProfileQuery();
-  const {
-    data: purchaseHistory,
-    isLoading: historyLoading,
-    refetch: refetchHistory,
-  } = useGetPurchaseHistoryQuery({ page: 1, limit: 5 });
+  const { refetch: refetchHistory } = useGetPurchaseHistoryQuery({
+    page: 1,
+    limit: 5,
+  });
 
   const [createOrder] = useCreateOrderMutation();
   const [verifyPayment] = useVerifyPaymentMutation();
@@ -320,7 +317,7 @@ export default function WalletDisplay() {
       </Card>
 
       <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
-        <div className='lg:col-span-2'>
+        <div className='lg:col-span-3'>
           <Card className='bg-white/5 backdrop-blur-xl border border-white/10'>
             <CardHeader>
               <CardTitle className='flex items-center gap-2 text-white'>
@@ -411,67 +408,22 @@ export default function WalletDisplay() {
               </p>
             </CardContent>
           </Card>
+          <br />
+          <Card className='bg-gradient-to-r from-amber-500/10 to-orange-500/10 backdrop-blur-xl border border-amber-500/20'>
+            <CardContent className='space-y-3'>
+              <p className='text-xs text-white/60 pl-6'>
+                📦 Package will be delivered after purchasing tokens.
+              </p>
+              <div className='flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg'>
+                <AlertCircle className='text-amber-400 mt-0.5' size={16} />
+                <p className='text-sm text-amber-200 font-medium'>
+                  Do not throw away the package until you've entered the attach
+                  code!
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-
-        <Card className='bg-white/5 backdrop-blur-xl border border-white/10'>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2 text-white text-base'>
-              <History size={18} className='text-purple-400' />
-              Recent Transactions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {historyLoading ? (
-              <div className='flex justify-center py-8'>
-                <RefreshCw className='animate-spin text-white/40' size={24} />
-              </div>
-            ) : purchaseHistory?.data?.length ? (
-              <div className='space-y-3'>
-                {purchaseHistory.data.map((purchase) => (
-                  <div
-                    key={purchase._id}
-                    className='flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/10'
-                  >
-                    <div
-                      className={cn(
-                        "p-2 rounded-lg",
-                        purchase.status === "COMPLETED"
-                          ? "bg-green-500/20"
-                          : purchase.status === "PENDING"
-                            ? "bg-yellow-500/20"
-                            : "bg-red-500/20",
-                      )}
-                    >
-                      {purchase.status === "COMPLETED" ? (
-                        <CheckCircle2 className='text-green-400' size={16} />
-                      ) : purchase.status === "PENDING" ? (
-                        <Clock className='text-yellow-400' size={16} />
-                      ) : (
-                        <XCircle className='text-red-400' size={16} />
-                      )}
-                    </div>
-                    <div className='flex-1 min-w-0'>
-                      <p className='text-sm font-medium text-white'>
-                        +{purchase.tokenQuantity} tokens
-                      </p>
-                      <p className='text-xs text-white/60 truncate'>
-                        {new Date(purchase.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <p className='text-sm font-semibold text-white'>
-                      ₹{purchase.totalAmount.toLocaleString()}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className='text-center py-8'>
-                <Wallet className='mx-auto text-white/20 mb-3' size={32} />
-                <p className='text-white/60 text-sm'>No transactions yet</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
