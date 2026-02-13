@@ -68,17 +68,17 @@ export const dealershipOwnerNavigation: NavigationSection[] = [
   {
     title: "Team Management",
     items: [
-      { label: "Salesmen", icon: Users, path: "/dealer-dashboard/salesmen" },
       {
-        label: "Passkeys",
-        icon: Key,
-        path: "/dealer-dashboard/passkeys",
-        description: "Generate codes for salesmen",
+        label: "Create Passkeys",
+        icon: Users,
+        path: "/create-passkeys",
+        description: "Link passkeys for colleagues",
       },
       {
-        label: "Delegations",
-        icon: UserPlus,
-        path: "/dealer-dashboard/delegations",
+        label: "Connect Colleagues",
+        icon: Key,
+        path: "/connect-colleague",
+        description: "Generate passkeys for colleagues",
       },
     ],
   },

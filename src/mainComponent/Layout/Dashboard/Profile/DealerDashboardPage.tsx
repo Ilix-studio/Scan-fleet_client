@@ -78,12 +78,7 @@ function OwnerDashboard({ profile }: { profile: any }) {
           icon={<Wallet className='text-cyan-400' size={20} />}
           highlight
         />
-        <StatCard
-          label='Active Salesmen'
-          value={profile?.linkedSalesmenCount ?? 0}
-          subtext={`of ${profile?.maxLinkedSalesmen ?? 10} slots`}
-          icon={<Users className='text-purple-400' size={20} />}
-        />
+
         <StatCard
           label='This Month'
           value={profile?.lifetimeTokensUsed ?? 0}
@@ -95,6 +90,12 @@ function OwnerDashboard({ profile }: { profile: any }) {
           value={`₹${(profile?.lifetimeSpent ?? 0).toLocaleString()}`}
           subtext='lifetime'
           icon={<TrendingUp className='text-orange-400' size={20} />}
+        />
+        <StatCard
+          label='Connect Account'
+          value={profile?.linkedSalesmenCount ?? 0}
+          subtext={`of ${profile?.maxLinkedSalesmen ?? 10} slots`}
+          icon={<Users className='text-purple-400' size={20} />}
         />
       </div>
 
@@ -207,14 +208,9 @@ function OwnerDashboard({ profile }: { profile: any }) {
           title='Generate Passkey'
           description='Create access code for new salesman'
           icon={<Key className='text-cyan-400' size={24} />}
-          href='/dealer-dashboard/passkeys'
+          href='/create-passkeys'
         />
-        <QuickActionCard
-          title='Delegate Tokens'
-          description='Assign tokens to salesmen'
-          icon={<Users className='text-purple-400' size={24} />}
-          href='/dealer-dashboard/delegations'
-        />
+
         <QuickActionCard
           title='View All Orders'
           description='Track order status and history'

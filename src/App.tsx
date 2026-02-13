@@ -25,6 +25,9 @@ import TokenDisplayPage from "./mainComponent/Pages/dashboard/shared/TokenDispla
 import PurchaseHistoryPage from "./mainComponent/Pages/dashboard/shared/PurchaseHistoryPage";
 import UseTokenPage from "./mainComponent/Pages/dashboard/shared/UseTokenPage";
 
+import CreatePasskeyPage from "./mainComponent/Pages/dashboard/dealer/createP/CreatePasskeyPage";
+import ConnectSalesmanPage from "./mainComponent/Pages/dashboard/dealer/connectSM/ConnectSalesmanPage";
+
 const App = () => {
   const location = useLocation();
 
@@ -120,6 +123,8 @@ const App = () => {
         <Route path='/purchase-token' element={<TokenDisplayPage />} />
         <Route path='/wallet' element={<WalletPage />} />
         <Route path='/purchase-history' element={<PurchaseHistoryPage />} />
+        <Route path='/create-passkeys' element={<CreatePasskeyPage />} />
+        <Route path='/connect-colleague' element={<ConnectSalesmanPage />} />
         <Route path='/use-token' element={<UseTokenPage />} />
         <Route path='*' element={<NotFound />} />
       </Routes>
