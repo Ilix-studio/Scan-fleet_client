@@ -15,6 +15,7 @@ import {
   LucideIcon,
   BadgeHelp,
   Blend,
+  PhoneCall,
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -64,30 +65,14 @@ export const dealershipOwnerNavigation: NavigationSection[] = [
         icon: TrendingUp,
         path: "/use-token",
       },
-    ],
-  },
-  {
-    title: "Operations",
-    items: [
       {
-        label: "Process Order",
-        icon: Package,
-        path: "/dealer-dashboard/process-order",
-        description: "Create order for customer",
-      },
-      {
-        label: "My Orders",
+        label: "Track Orders",
         icon: FileText,
-        path: "/dealer-dashboard/my-orders",
-      },
-      {
-        label: "Delegations",
-        icon: UserPlus,
-        path: "/dealer-dashboard/received-loads",
-        description: "Orders delegated to you",
+        path: "/track-orders",
       },
     ],
   },
+
   {
     title: "Team Management",
     items: [
@@ -106,9 +91,13 @@ export const dealershipOwnerNavigation: NavigationSection[] = [
     ],
   },
   {
-    title: "Orders",
+    title: "External System",
     items: [
-      { label: "All Orders", icon: Package, path: "/dealer-dashboard/orders" },
+      {
+        label: "Integrate with Your System",
+        icon: Package,
+        path: "/dealer-dashboard/orders",
+      },
       { label: "Reports", icon: FileText, path: "/dealer-dashboard/reports" },
     ],
   },
@@ -250,6 +239,11 @@ export const directCustomerNavigation: NavigationSection[] = [
     title: "Account",
     items: [
       { label: "Settings", icon: Settings, path: "/user-dashboard/settings" },
+      {
+        label: "Caller History",
+        icon: PhoneCall,
+        path: "/user-dashboard/caller-display",
+      },
     ],
   },
 ];
