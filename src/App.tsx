@@ -27,6 +27,7 @@ import UseTokenPage from "./mainComponent/Pages/dashboard/shared/UseTokenPage";
 
 import CreatePasskeyPage from "./mainComponent/Pages/dashboard/dealer/createP/CreatePasskeyPage";
 import ConnectSalesmanPage from "./mainComponent/Pages/dashboard/dealer/connectSM/ConnectSalesmanPage";
+import MyDealershipPage from "./mainComponent/Pages/dashboard/dealer/salesman/MyDealershipPage";
 
 const App = () => {
   const location = useLocation();
@@ -108,7 +109,6 @@ const App = () => {
         {/* User dashboards - organized by role */}
         <Route path='/user-dashboard' element={<UserDashboardPage />} />
         <Route path='/dealer-dashboard' element={<DealerDashboardPage />} />
-
         <Route path='/rental-dashboard' element={<RentalDashboardPage />} />
         <Route path='/admin-dashboard' element={<AdminDashboardPage />} />
         <Route path='/sticker-style' element={<StickerStyle />} />
@@ -126,6 +126,9 @@ const App = () => {
         <Route path='/create-passkeys' element={<CreatePasskeyPage />} />
         <Route path='/connect-colleague' element={<ConnectSalesmanPage />} />
         <Route path='/use-token' element={<UseTokenPage />} />
+
+        {/* Other routes */}
+        <Route path='/my-dealership' element={<MyDealershipPage />} />
         <Route path='*' element={<NotFound />} />
       </Routes>
     </>
