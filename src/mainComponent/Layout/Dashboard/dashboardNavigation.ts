@@ -14,6 +14,7 @@ import {
   BarChart3,
   LucideIcon,
   BadgeHelp,
+  Blend,
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -66,6 +67,28 @@ export const dealershipOwnerNavigation: NavigationSection[] = [
     ],
   },
   {
+    title: "Operations",
+    items: [
+      {
+        label: "Process Order",
+        icon: Package,
+        path: "/dealer-dashboard/process-order",
+        description: "Create order for customer",
+      },
+      {
+        label: "My Orders",
+        icon: FileText,
+        path: "/dealer-dashboard/my-orders",
+      },
+      {
+        label: "Delegations",
+        icon: UserPlus,
+        path: "/dealer-dashboard/received-loads",
+        description: "Orders delegated to you",
+      },
+    ],
+  },
+  {
     title: "Team Management",
     items: [
       {
@@ -94,17 +117,39 @@ export const dealershipOwnerNavigation: NavigationSection[] = [
 export const dealershipSalesmanNavigation: NavigationSection[] = [
   {
     title: "Overview",
-    items: [{ label: "Dashboard", icon: Home, path: "/dealer-dashboard" }],
+    items: [
+      { label: "Dashboard", icon: Home, path: "/dealer-dashboard" },
+      {
+        label: "What is Token?",
+        icon: BadgeHelp,
+        path: "/purchase-token",
+      },
+    ],
+  },
+  {
+    title: "Token Management",
+    items: [
+      {
+        label: "Wallet",
+        icon: Wallet,
+        path: "/wallet",
+        description: "View balance and purchase tokens",
+      },
+      {
+        label: "Purchase History",
+        icon: ShoppingCart,
+        path: "/purchase-history",
+      },
+      {
+        label: "Token Usage",
+        icon: TrendingUp,
+        path: "/use-token",
+      },
+    ],
   },
   {
     title: "Operations",
     items: [
-      {
-        label: "Process Order",
-        icon: Package,
-        path: "/dealer-dashboard/process-order",
-        description: "Create order for customer",
-      },
       {
         label: "My Orders",
         icon: FileText,
@@ -124,13 +169,13 @@ export const dealershipSalesmanNavigation: NavigationSection[] = [
       {
         label: "My Dealership",
         icon: Users,
-        path: "/dealer-dashboard/my-dealership",
+        path: "/my-dealership",
         description: "View dealership info",
       },
       {
-        label: "Available Tokens",
-        icon: Wallet,
-        path: "/dealer-dashboard/tokens",
+        label: "Shared Design",
+        icon: Blend,
+        path: "/dealer-dashboard/shared-design",
       },
     ],
   },
