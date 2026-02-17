@@ -487,7 +487,7 @@ function ApiAccessTab() {
                 <Wallet className='w-4 h-4 text-cyan-400' />
                 Token Wallet
               </h3>
-              <div className='grid grid-cols-2 sm:grid-cols-4 gap-3'>
+              <div className='grid grid-cols-2 sm:grid-cols-3 gap-3'>
                 {[
                   { label: "Balance", value: account.wallet.balance },
                   {
@@ -495,7 +495,6 @@ function ApiAccessTab() {
                     value: account.wallet.lifetimePurchased,
                   },
                   { label: "Used", value: account.wallet.lifetimeUsed },
-                  { label: "Spent", value: `₹${account.wallet.lifetimeSpent}` },
                 ].map(({ label, value }) => (
                   <div key={label}>
                     <p className='text-xs text-gray-500 mb-1'>{label}</p>
@@ -508,10 +507,10 @@ function ApiAccessTab() {
 
           {account.salesmen && (
             <div className='bg-white/5 border border-white/10 rounded-lg p-4'>
-              <p className='text-xs text-gray-500 mb-2'>Linked Salesmen</p>
+              <p className='text-xs text-gray-500 mb-2'>Linked Employee</p>
               <p className='text-sm text-white font-medium'>
                 {account.salesmen.linkedCount} / {account.salesmen.maxAllowed}{" "}
-                salesmen linked
+                employees linked
               </p>
             </div>
           )}
