@@ -91,13 +91,8 @@ export const dealershipOwnerNavigation: NavigationSection[] = [
     ],
   },
   {
-    title: "External System",
+    title: "Other Features",
     items: [
-      {
-        label: "Integrate with Your System",
-        icon: Package,
-        path: "/dealer-dashboard/orders",
-      },
       { label: "Reports", icon: FileText, path: "/dealer-dashboard/reports" },
     ],
   },

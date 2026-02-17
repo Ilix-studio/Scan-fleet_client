@@ -1,21 +1,40 @@
-// redux-store/services/external/apiAccountApi.ts
-
+// src/redux-store/services/external/apiAccountApi.ts
 import { baseApi } from "../baseApi";
 
-interface CreateApiAccountRequest {
-  businessName: string;
-  email: string;
-  phone: string;
-  businessAddress?: string;
-  gstNumber?: string;
-  maxLinkedSalesmen?: number;
-  apiRateLimitPerHour?: number;
-  apiRateLimitPerDay?: number;
-  allowedIPs?: string[];
-  webhookUrl?: string;
+interface WalletInfo {
+  balance: number;
+  lifetimePurchased: number;
+  lifetimeUsed: number;
+  lifetimeSpent: number;
 }
 
-interface ApiAccountCredentials {
+interface SalesmenInfo {
+  linkedCount: number;
+  maxAllowed: number;
+}
+
+interface ApiAccountDetails {
+  accountId: string;
+  businessName?: string;
+  email: string;
+  phone: string;
+  status: "ACTIVE" | "SUSPENDED" | "PENDING_VERIFICATION";
+  apiEnabled: boolean;
+  apiKey: string | null;
+  apiCreatedAt?: string;
+  apiLastUsedAt?: string;
+  apiRequestCount: number;
+  webhookUrl?: string;
+  allowedIPs: string[];
+  apiRateLimitPerHour: number;
+  apiRateLimitPerDay: number;
+  wallet: WalletInfo;
+  salesmen: SalesmenInfo;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ApiCredentials {
   apiKey: string;
   apiSecret: string;
   webhookSecret: string;
@@ -24,152 +43,72 @@ interface ApiAccountCredentials {
   email: string;
 }
 
-interface ApiAccount {
-  id: string;
-  businessName: string;
-  email: string;
-  phone: string;
-  apiKey: string;
-  apiEnabled: boolean;
-  status: "ACTIVE" | "SUSPENDED";
-  apiRequestCount: number;
-  apiLastUsedAt?: string;
-  linkedSalesmenCount: number;
-  maxLinkedSalesmen: number;
-  walletBalance: number;
-  apiRateLimitPerHour: number;
-  apiRateLimitPerDay: number;
-  allowedIPs: string[];
-  webhookUrl?: string;
-  createdAt: string;
-}
-
 interface RegenerateSecretResponse {
   apiKey: string;
   apiSecret: string;
 }
 
-interface UpdateApiAccountSettingsRequest {
-  apiRateLimitPerHour?: number;
-  apiRateLimitPerDay?: number;
-  allowedIPs?: string[];
-  webhookUrl?: string;
-  maxLinkedSalesmen?: number;
-}
-
-export const apiAccountApi = baseApi.injectEndpoints({
+export const myApiAccountApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Create a new DEALERSHIP_APP API account
-    createApiAccount: builder.mutation<
-      ApiAccountCredentials,
-      CreateApiAccountRequest
+    getMyApiAccountDetails: builder.query<
+      { success: boolean; data: ApiAccountDetails },
+      void
     >({
-      query: (data: CreateApiAccountRequest) => ({
+      query: () => "/api-accounts/me",
+      providesTags: [{ type: "ApiAccount", id: "ME" }],
+    }),
+
+    createMyApiAccount: builder.mutation<
+      { success: boolean; data: ApiCredentials; message: string },
+      void
+    >({
+      query: () => ({
         url: "/api-accounts",
         method: "POST",
-        body: data,
       }),
-      invalidatesTags: ["ApiAccount"],
+      invalidatesTags: [{ type: "ApiAccount", id: "ME" }],
     }),
 
-    // List all API accounts (admin only)
-    listApiAccounts: builder.query<
-      { accounts: ApiAccount[]; total: number; page: number; limit: number },
-      { page?: number; limit?: number; status?: "ACTIVE" | "SUSPENDED" }
+    regenerateMyApiSecret: builder.mutation<
+      { success: boolean; data: RegenerateSecretResponse; message: string },
+      void
     >({
-      query: ({ page = 1, limit = 20, status }) => {
-        const params = new URLSearchParams({
-          page: page.toString(),
-          limit: limit.toString(),
-        });
-        if (status) params.append("status", status);
-        return {
-          url: `/api-accounts?${params.toString()}`,
-          method: "GET",
-        };
-      },
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.accounts.map(({ id }) => ({
-                type: "ApiAccount" as const,
-                id,
-              })),
-              { type: "ApiAccount", id: "LIST" },
-            ]
-          : [{ type: "ApiAccount", id: "LIST" }],
-    }),
-
-    // Get details of a specific API account
-    getApiAccountDetails: builder.query<ApiAccount, string>({
-      query: (accountId: string) => `/api-accounts/${accountId}`,
-      providesTags: (_result, _error, accountId) => [
-        { type: "ApiAccount", id: accountId },
-      ],
-    }),
-
-    // Regenerate API secret (returns the new secret only once)
-    regenerateApiSecret: builder.mutation<RegenerateSecretResponse, string>({
-      query: (accountId: string) => ({
-        url: `/api-accounts/${accountId}/regenerate-secret`,
+      query: () => ({
+        url: "/api-accounts/regenerate-secret",
         method: "POST",
       }),
-      invalidatesTags: (_result, _error, accountId) => [
-        { type: "ApiAccount", id: accountId },
-      ],
+      invalidatesTags: [{ type: "ApiAccount", id: "ME" }],
     }),
 
-    // Toggle account status (activate/suspend)
-    toggleApiAccountStatus: builder.mutation<
-      { success: boolean; newStatus: string },
-      { accountId: string; activate: boolean }
+    enableMyApiAccess: builder.mutation<
+      { success: boolean; message: string },
+      void
     >({
-      query: ({ accountId, activate }) => ({
-        url: `/api-accounts/${accountId}/status`,
-        method: "PATCH",
-        body: { activate },
+      query: () => ({
+        url: "/api-accounts/enable",
+        method: "POST",
       }),
-      invalidatesTags: (_result, _error, { accountId }) => [
-        { type: "ApiAccount", id: accountId },
-        { type: "ApiAccount", id: "LIST" },
-      ],
+      invalidatesTags: [{ type: "ApiAccount", id: "ME" }],
     }),
 
-    // Update API account settings
-    updateApiAccountSettings: builder.mutation<
-      ApiAccount,
-      { accountId: string; updates: UpdateApiAccountSettingsRequest }
+    disableMyApiAccess: builder.mutation<
+      { success: boolean; message: string },
+      void
     >({
-      query: ({ accountId, updates }) => ({
-        url: `/api-accounts/${accountId}/settings`,
-        method: "PATCH",
-        body: updates,
-      }),
-      invalidatesTags: (_result, _error, { accountId }) => [
-        { type: "ApiAccount", id: accountId },
-      ],
-    }),
-
-    // Delete API account
-    deleteApiAccount: builder.mutation<void, string>({
-      query: (accountId: string) => ({
-        url: `/api-accounts/${accountId}`,
+      query: () => ({
+        url: "/api-accounts",
         method: "DELETE",
       }),
-      invalidatesTags: (_result, _error, accountId) => [
-        { type: "ApiAccount", id: accountId },
-        { type: "ApiAccount", id: "LIST" },
-      ],
+      invalidatesTags: [{ type: "ApiAccount", id: "ME" }],
     }),
   }),
+  overrideExisting: false,
 });
 
 export const {
-  useCreateApiAccountMutation,
-  useListApiAccountsQuery,
-  useGetApiAccountDetailsQuery,
-  useRegenerateApiSecretMutation,
-  useToggleApiAccountStatusMutation,
-  useUpdateApiAccountSettingsMutation,
-  useDeleteApiAccountMutation,
-} = apiAccountApi;
+  useGetMyApiAccountDetailsQuery,
+  useCreateMyApiAccountMutation,
+  useRegenerateMyApiSecretMutation,
+  useEnableMyApiAccessMutation,
+  useDisableMyApiAccessMutation,
+} = myApiAccountApi;

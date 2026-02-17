@@ -13,7 +13,7 @@ const ContactSection = () => {
   const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -108,7 +108,7 @@ const ContactSection = () => {
                 </li>
                 <li>
                   <a
-                    href='#'
+                    href='/api-reference'
                     className='text-cyan-400 hover:text-cyan-300 transition-colors'
                   >
                     API Reference
