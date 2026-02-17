@@ -28,6 +28,8 @@ import UseTokenPage from "./mainComponent/Pages/dashboard/shared/UseTokenPage";
 import CreatePasskeyPage from "./mainComponent/Pages/dashboard/dealer/createP/CreatePasskeyPage";
 import ConnectSalesmanPage from "./mainComponent/Pages/dashboard/dealer/connectSM/ConnectSalesmanPage";
 import MyDealershipPage from "./mainComponent/Pages/dashboard/dealer/salesman/MyDealershipPage";
+import ApiDocs from "./mainComponent/Layout/External/APIDocs";
+import SettingsPage from "./mainComponent/Layout/Dashboard/SettingPage";
 
 const App = () => {
   const location = useLocation();
@@ -105,6 +107,7 @@ const App = () => {
         <Route path='/signup' element={<Signup />} />
         <Route path='/admin-login' element={<AdminLogin />} />
         <Route path='/login' element={<Login />} />
+        <Route path='/api-reference' element={<ApiDocs />} />
 
         {/* User dashboards - organized by role */}
         <Route path='/user-dashboard' element={<UserDashboardPage />} />
@@ -112,6 +115,9 @@ const App = () => {
         <Route path='/rental-dashboard' element={<RentalDashboardPage />} />
         <Route path='/admin-dashboard' element={<AdminDashboardPage />} />
         <Route path='/sticker-style' element={<StickerStyle />} />
+
+        {/* Setting routes */}
+        <Route path='/settings' element={<SettingsPage />} />
 
         {/* Admin dashboards */}
         <Route path='/admin-create-tags' element={<AdminCreateTags />} />

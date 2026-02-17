@@ -1,7 +1,7 @@
 // src/components/layouts/DashboardLayout.tsx
 import { ReactNode, useState } from "react";
-import { Menu, X, Bell, Settings, LogOut, UserCog } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Menu, X, Settings, LogOut, ScanQrCode } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   useGetUserProfileQuery,
   useUserLogoutMutation,
@@ -56,19 +56,24 @@ export default function DashboardLayout({
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
 
-            <div className='flex items-center gap-2'>
-              <div className='w-8 h-8 bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500 rounded-lg' />
-              <span className='font-bold text-lg'>ScanFleet</span>
-            </div>
+            <Link
+              to='/'
+              className='flex items-center gap-3 font-bold text-l text-white hover:scale-105 transition-transform duration-200'
+            >
+              <div className='relative'>
+                <div className='w-8 h-8 bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold shadow-lg'>
+                  <ScanQrCode size={20} />
+                </div>
+                <div className='absolute -inset-1 bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500 rounded-xl blur opacity-30'></div>
+              </div>
+              <span className='hidden sm:inline bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent'>
+                ScanFleet
+              </span>
+            </Link>
           </div>
 
           {/* Right side - User info and actions */}
           <div className='flex items-center gap-4'>
-            <button className='p-2 hover:bg-white/10 rounded-lg transition-colors relative'>
-              <Bell size={20} />
-              <span className='absolute top-1 right-1 w-2 h-2 bg-cyan-400 rounded-full' />
-            </button>
-
             {/* User menu dropdown */}
             <div className='relative'>
               <button
@@ -101,16 +106,7 @@ export default function DashboardLayout({
                     <Settings size={18} />
                     <span>Settings</span>
                   </button>
-                  <button
-                    onClick={() => {
-                      navigate("/profile");
-                      setShowUserMenu(false);
-                    }}
-                    className='w-full flex items-center gap-3 px-4 py-3 hover:bg-white/10 transition-colors text-left'
-                  >
-                    <UserCog size={18} />
-                    <span>Profile</span>
-                  </button>
+
                   <div className='border-t border-white/10' />
                   <button
                     onClick={handleLogout}
