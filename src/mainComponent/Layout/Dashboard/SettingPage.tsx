@@ -18,27 +18,32 @@ import {
   EyeOff,
   RefreshCw,
   Trash2,
-  ToggleLeft,
-  ToggleRight,
   CheckCircle,
   AlertCircle,
   Loader2,
+  Power,
+  Calendar,
+  Activity,
+  Globe,
+  Lock,
+  Zap,
+  Wallet,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
-import { useCreateApiAccountMutation } from "@/redux-store/services/external/apiAccountApi";
 import {
+  useGetMyApiAccountDetailsQuery,
+  useCreateMyApiAccountMutation,
   useDisableMyApiAccessMutation,
   useEnableMyApiAccessMutation,
-  useGetMyApiAccountDetailsQuery,
   useRegenerateMyApiSecretMutation,
-} from "@/redux-store/services/external/myApiAccountApi";
+} from "@/redux-store/services/external/apiAccountApi";
+
 type UserRole =
   | "DEALERSHIP_OWNER"
   | "DEALERSHIP_SALESMAN"
   | "RENTAL_OWNER"
   | "DIRECT_CUSTOMER";
-
 type SettingsTab = "profile" | "api-access" | "security" | "notifications";
 
 interface TabConfig {
@@ -48,9 +53,6 @@ interface TabConfig {
   roles: UserRole[] | "all";
 }
 
-// ------------------------------------------------------------------
-// Constants
-// ------------------------------------------------------------------
 const NAV_BY_ROLE: Record<string, typeof dealershipOwnerNavigation> = {
   DEALERSHIP_OWNER: dealershipOwnerNavigation,
   DEALERSHIP_SALESMAN: dealershipSalesmanNavigation,
@@ -70,9 +72,6 @@ const TABS: TabConfig[] = [
   { id: "notifications", label: "Notifications", icon: Bell, roles: "all" },
 ];
 
-// ------------------------------------------------------------------
-// Shared UI
-// ------------------------------------------------------------------
 function CopyButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
   const handleCopy = useCallback(() => {
@@ -99,18 +98,17 @@ function CopyButton({ value }: { value: string }) {
 function MaskedSecret({ value, label }: { value: string; label: string }) {
   const [visible, setVisible] = useState(false);
   return (
-    <div className='flex flex-col gap-1'>
+    <div className='flex flex-col gap-1.5'>
       <span className='text-xs text-gray-500 font-medium uppercase tracking-wider'>
         {label}
       </span>
-      <div className='flex items-center gap-2 bg-black/40 border border-white/10 rounded-lg px-3 py-2'>
+      <div className='flex items-center gap-2 bg-black/60 border border-white/10 rounded-lg px-3 py-2.5'>
         <code className='flex-1 text-sm text-cyan-300 font-mono break-all'>
           {visible ? value : "•".repeat(Math.min(value.length, 40))}
         </code>
         <button
           onClick={() => setVisible((v) => !v)}
           className='p-1 text-gray-400 hover:text-cyan-400 transition-colors'
-          title={visible ? "Hide" : "Show"}
         >
           {visible ? (
             <EyeOff className='w-4 h-4' />
@@ -124,18 +122,31 @@ function MaskedSecret({ value, label }: { value: string; label: string }) {
   );
 }
 
-// ------------------------------------------------------------------
-// Tab: Profile
-// ------------------------------------------------------------------
 function ProfileTab() {
   const { data: profile } = useGetUserProfileQuery();
 
+  const roleBadgeColors: Record<UserRole, string> = {
+    DEALERSHIP_OWNER: "bg-cyan-500/10 text-cyan-400 border border-cyan-500/20",
+    DEALERSHIP_SALESMAN:
+      "bg-purple-500/10 text-purple-400 border border-purple-500/20",
+    RENTAL_OWNER: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+    DIRECT_CUSTOMER:
+      "bg-green-500/10 text-green-400 border border-green-500/20",
+  };
+
+  const roleLabels: Record<UserRole, string> = {
+    DEALERSHIP_OWNER: "Dealership Owner",
+    DEALERSHIP_SALESMAN: "Dealership Salesman",
+    RENTAL_OWNER: "Rental Owner",
+    DIRECT_CUSTOMER: "Direct Customer",
+  };
+
   const fields = [
-    { label: "Full Name", value: profile?.name ?? "—" },
-    { label: "Email", value: profile?.email ?? "—" },
-    { label: "Phone", value: profile?.phone ?? "—" },
+    { label: "Full Name", value: profile?.name ?? "—", icon: User },
+    { label: "Email", value: profile?.email ?? "—", icon: Globe },
+    { label: "Phone", value: profile?.phone ?? "—", icon: Activity },
     ...(profile?.businessName
-      ? [{ label: "Business Name", value: profile.businessName }]
+      ? [{ label: "Business Name", value: profile.businessName, icon: User }]
       : []),
   ];
 
@@ -150,10 +161,20 @@ function ProfileTab() {
         </p>
       </div>
 
+      <div className='flex items-center gap-3'>
+        <span className='text-sm text-gray-400'>Current Role:</span>
+        <span
+          className={`text-xs font-semibold px-3 py-1.5 rounded-full ${roleBadgeColors[profile?.role as UserRole]}`}
+        >
+          {roleLabels[profile?.role as UserRole]}
+        </span>
+      </div>
+
       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-        {fields.map(({ label, value }) => (
-          <div key={label} className='space-y-1'>
-            <label className='text-xs text-gray-500 uppercase tracking-wider font-medium'>
+        {fields.map(({ label, value, icon: Icon }) => (
+          <div key={label} className='space-y-1.5'>
+            <label className='text-xs text-gray-500 uppercase tracking-wider font-medium flex items-center gap-1.5'>
+              <Icon className='w-3.5 h-3.5' />
               {label}
             </label>
             <div className='bg-black/40 border border-white/10 rounded-lg px-3 py-2.5'>
@@ -162,25 +183,19 @@ function ProfileTab() {
           </div>
         ))}
       </div>
-
-      <p className='text-xs text-gray-600'>
-        To update profile details, contact support or use account management.
-      </p>
     </div>
   );
 }
 
-// ------------------------------------------------------------------
-// Tab: API Access (DEALERSHIP_OWNER only)
-// ------------------------------------------------------------------
 function ApiAccessTab() {
   const {
     data: accountRes,
     isLoading,
     isError,
+    refetch,
   } = useGetMyApiAccountDetailsQuery();
   const [createApiAccount, { isLoading: isCreating }] =
-    useCreateApiAccountMutation();
+    useCreateMyApiAccountMutation();
   const [regenerateSecret, { isLoading: isRegenerating }] =
     useRegenerateMyApiSecretMutation();
   const [disableAccess, { isLoading: isDisabling }] =
@@ -195,30 +210,38 @@ function ApiAccessTab() {
   } | null>(null);
 
   const account = accountRes?.data ?? null;
+  const hasApiKey = !!account?.apiKey;
 
   const handleCreate = useCallback(async () => {
     try {
-      // Backend derives businessName/email/phone from the authenticated user
-      const res = await createApiAccount({} as any).unwrap();
-      setNewCredentials(res as any);
-      toast.success("API access enabled — save credentials now.");
+      const res = await createApiAccount().unwrap();
+      setNewCredentials({
+        apiKey: res.data.apiKey,
+        apiSecret: res.data.apiSecret,
+        webhookSecret: res.data.webhookSecret,
+      });
+      toast.success("API credentials generated — save them now");
+      refetch();
     } catch (err: any) {
       toast.error(err?.data?.message ?? "Failed to enable API access");
     }
-  }, [createApiAccount]);
+  }, [createApiAccount, refetch]);
 
   const handleRegenerate = useCallback(async () => {
+    if (!confirm("Regenerating will invalidate your current secret. Continue?"))
+      return;
     try {
       const res = await regenerateSecret().unwrap();
       setNewCredentials({
         apiKey: res.data.apiKey,
         apiSecret: res.data.apiSecret,
       });
-      toast.success("Secret regenerated — save it now.");
+      toast.success("New secret generated — save it now");
+      refetch();
     } catch (err: any) {
       toast.error(err?.data?.message ?? "Failed to regenerate secret");
     }
-  }, [regenerateSecret]);
+  }, [regenerateSecret, refetch]);
 
   const handleToggle = useCallback(async () => {
     try {
@@ -229,20 +252,24 @@ function ApiAccessTab() {
         await enableAccess().unwrap();
         toast.success("API access enabled");
       }
+      refetch();
     } catch (err: any) {
       toast.error(err?.data?.message ?? "Operation failed");
     }
-  }, [account?.apiEnabled, disableAccess, enableAccess]);
+  }, [account?.apiEnabled, disableAccess, enableAccess, refetch]);
 
   const handleDelete = useCallback(async () => {
+    if (!confirm("Delete API credentials? All integrations will stop working."))
+      return;
     try {
       await disableAccess().unwrap();
       setNewCredentials(null);
       toast.success("API credentials deleted");
+      refetch();
     } catch (err: any) {
       toast.error(err?.data?.message ?? "Failed to delete credentials");
     }
-  }, [disableAccess]);
+  }, [disableAccess, refetch]);
 
   if (isLoading) {
     return (
@@ -257,19 +284,22 @@ function ApiAccessTab() {
       <div>
         <h2 className='text-lg font-semibold text-white'>API Access</h2>
         <p className='text-sm text-gray-400 mt-0.5'>
-          Manage API credentials for integrating ScanFleet with your dealership
-          systems.
+          Integrate ScanFleet with your dealership platform
         </p>
       </div>
 
-      {/* One-time credentials banner */}
       {newCredentials && (
-        <div className='bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 space-y-4'>
-          <div className='flex items-start gap-2'>
+        <div className='bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/30 rounded-xl p-5 space-y-4'>
+          <div className='flex items-start gap-3'>
             <AlertCircle className='w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0' />
-            <p className='text-sm text-amber-300 font-medium'>
-              Save these credentials now — the secret will not be shown again.
-            </p>
+            <div className='flex-1 space-y-1'>
+              <p className='text-sm text-amber-300 font-semibold'>
+                Save these credentials now
+              </p>
+              <p className='text-xs text-amber-200/80'>
+                The secret cannot be retrieved after dismissing this banner.
+              </p>
+            </div>
           </div>
           <MaskedSecret value={newCredentials.apiKey} label='API Key' />
           <MaskedSecret value={newCredentials.apiSecret} label='API Secret' />
@@ -281,156 +311,168 @@ function ApiAccessTab() {
           )}
           <button
             onClick={() => setNewCredentials(null)}
-            className='text-xs text-gray-500 hover:text-gray-300 transition-colors'
+            className='text-xs text-amber-400/80 hover:text-amber-300 transition-colors font-medium'
           >
-            Dismiss (credentials saved)
+            I've saved my credentials — dismiss
           </button>
         </div>
       )}
 
-      {/* No account */}
-      {!account && !newCredentials && (
-        <div className='bg-white/5 border border-white/10 rounded-xl p-6 flex flex-col items-center gap-4 text-center'>
-          <Key className='w-10 h-10 text-cyan-400/60' />
+      {!hasApiKey && !newCredentials && (
+        <div className='bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 rounded-2xl p-8 flex flex-col items-center gap-5 text-center'>
+          <div className='w-16 h-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center'>
+            <Key className='w-8 h-8 text-cyan-400' />
+          </div>
           <div>
-            <p className='text-white font-medium'>API access not enabled</p>
-            <p className='text-sm text-gray-400 mt-1'>
-              Enable API access to integrate ScanFleet with your website or
-              e-commerce platform.
+            <p className='text-white font-semibold text-lg'>
+              Enable API Integration
+            </p>
+            <p className='text-sm text-gray-400 mt-2 max-w-md'>
+              Generate credentials to connect your dealership systems with
+              ScanFleet.
             </p>
           </div>
           <button
             onClick={handleCreate}
             disabled={isCreating}
-            className='flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors'
+            className='flex items-center gap-2 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-black font-semibold text-sm px-6 py-3 rounded-lg transition-colors shadow-lg shadow-cyan-500/20'
           >
             {isCreating ? (
               <Loader2 className='w-4 h-4 animate-spin' />
             ) : (
-              <Key className='w-4 h-4' />
+              <Zap className='w-4 h-4' />
             )}
             Enable API Access
           </button>
         </div>
       )}
 
-      {/* Account exists */}
-      {account && (
-        <div className='space-y-4'>
-          {/* Status + controls */}
-          <div className='bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4 justify-between'>
-            <div className='space-y-1'>
-              <span className='text-xs text-gray-500 uppercase tracking-wider font-medium'>
-                Status
-              </span>
-              <div className='flex items-center gap-2'>
-                <span
-                  className={`inline-flex items-center gap-1.5 text-sm font-medium ${
-                    account.apiEnabled ? "text-green-400" : "text-red-400"
-                  }`}
-                >
-                  <span
-                    className={`w-2 h-2 rounded-full ${account.apiEnabled ? "bg-green-400" : "bg-red-400"}`}
-                  />
-                  {account.apiEnabled ? "Active" : "Disabled"}
+      {hasApiKey && account && (
+        <div className='space-y-5'>
+          <div className='bg-gradient-to-br from-white/5 to-white/[0.02] border border-white/10 rounded-xl p-5'>
+            <div className='flex flex-col sm:flex-row sm:items-center gap-4 justify-between'>
+              <div className='space-y-2'>
+                <span className='text-xs text-gray-500 uppercase tracking-wider font-medium flex items-center gap-1.5'>
+                  <Power className='w-3.5 h-3.5' />
+                  API Status
                 </span>
+                <div className='flex items-center gap-2.5'>
+                  <span
+                    className={`inline-flex items-center gap-2 text-sm font-semibold ${account.apiEnabled ? "text-green-400" : "text-red-400"}`}
+                  >
+                    <span
+                      className={`w-2.5 h-2.5 rounded-full ${account.apiEnabled ? "bg-green-400 animate-pulse" : "bg-red-400"}`}
+                    />
+                    {account.apiEnabled ? "Active" : "Disabled"}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <div className='flex items-center gap-2 flex-wrap'>
-              <button
-                onClick={handleToggle}
-                disabled={isDisabling || isEnabling}
-                className='flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg border border-white/10 text-gray-300 hover:text-white hover:border-white/20 disabled:opacity-50 transition-colors'
-              >
-                {isDisabling || isEnabling ? (
-                  <Loader2 className='w-4 h-4 animate-spin' />
-                ) : account.apiEnabled ? (
-                  <ToggleRight className='w-4 h-4 text-green-400' />
-                ) : (
-                  <ToggleLeft className='w-4 h-4 text-red-400' />
-                )}
-                {account.apiEnabled ? "Disable" : "Enable"}
-              </button>
+              <div className='flex items-center gap-2 flex-wrap'>
+                <button
+                  onClick={handleToggle}
+                  disabled={isDisabling || isEnabling}
+                  className={`flex items-center gap-1.5 text-sm px-4 py-2.5 rounded-lg border transition-all font-medium ${
+                    account.apiEnabled
+                      ? "border-red-500/30 text-red-400 hover:bg-red-500/10"
+                      : "border-green-500/30 text-green-400 hover:bg-green-500/10"
+                  } disabled:opacity-50`}
+                >
+                  {isDisabling || isEnabling ? (
+                    <Loader2 className='w-4 h-4 animate-spin' />
+                  ) : (
+                    <Power className='w-4 h-4' />
+                  )}
+                  {account.apiEnabled ? "Disable" : "Enable"}
+                </button>
 
-              <button
-                onClick={handleRegenerate}
-                disabled={isRegenerating}
-                className='flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 disabled:opacity-50 transition-colors'
-              >
-                {isRegenerating ? (
-                  <Loader2 className='w-4 h-4 animate-spin' />
-                ) : (
-                  <RefreshCw className='w-4 h-4' />
-                )}
-                Regenerate Secret
-              </button>
+                <button
+                  onClick={handleRegenerate}
+                  disabled={isRegenerating}
+                  className='flex items-center gap-1.5 text-sm px-4 py-2.5 rounded-lg border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 disabled:opacity-50 transition-all font-medium'
+                >
+                  {isRegenerating ? (
+                    <Loader2 className='w-4 h-4 animate-spin' />
+                  ) : (
+                    <RefreshCw className='w-4 h-4' />
+                  )}
+                  Regenerate
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* API Key display */}
-          <div className='bg-black/40 border border-white/10 rounded-xl p-4 space-y-3'>
-            <div className='space-y-1'>
-              <span className='text-xs text-gray-500 uppercase tracking-wider font-medium'>
-                API Key
+          <div className='bg-black/40 border border-white/10 rounded-xl p-5 space-y-4'>
+            <div className='space-y-2'>
+              <span className='text-xs text-gray-500 uppercase tracking-wider font-medium flex items-center gap-1.5'>
+                <Key className='w-3.5 h-3.5' />
+                Your API Key
               </span>
-              <div className='flex items-center gap-2 bg-black/60 border border-white/10 rounded-lg px-3 py-2'>
-                <code className='flex-1 text-sm text-cyan-300 font-mono truncate'>
-                  {account.apiKey}
-                </code>
-                <CopyButton value={account.apiKey} />
+              <div className='flex items-center gap-2 bg-black/60 border border-white/10 rounded-lg px-3 py-2.5'>
+                {account.apiKey && (
+                  <div className='bg-black/40 border border-white/10 rounded-xl p-5 space-y-4'>
+                    <div className='space-y-2'>
+                      <span className='text-xs text-gray-500 uppercase tracking-wider font-medium flex items-center gap-1.5'>
+                        <Key className='w-3.5 h-3.5' />
+                        Your API Key
+                      </span>
+                      <div className='flex items-center gap-2 bg-black/60 border border-white/10 rounded-lg px-3 py-2.5'>
+                        <code className='flex-1 text-sm text-cyan-300 font-mono truncate'>
+                          {account.apiKey}
+                        </code>
+                        <CopyButton value={account.apiKey} />
+                      </div>
+                    </div>
+                    <p className='text-xs text-gray-600 flex items-start gap-1.5'>
+                      <Lock className='w-3.5 h-3.5 mt-0.5 flex-shrink-0' />
+                      API Secret is hidden. Use "Regenerate" to issue new
+                      credentials.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
-            <p className='text-xs text-gray-600'>
-              API Secret is not displayed after initial creation. Use
-              "Regenerate Secret" to issue a new one.
+            <p className='text-xs text-gray-600 flex items-start gap-1.5'>
+              <Lock className='w-3.5 h-3.5 mt-0.5 flex-shrink-0' />
+              API Secret is hidden. Use "Regenerate" to issue new credentials.
             </p>
           </div>
 
-          {/* Usage stats */}
-          <div className='grid grid-cols-2 sm:grid-cols-3 gap-3'>
+          <div className='grid grid-cols-2 lg:grid-cols-4 gap-3'>
             {[
               {
                 label: "Total Requests",
-                value: account.apiRequestCount.toLocaleString(),
+                value: account.apiRequestCount?.toLocaleString() ?? "0",
+                icon: Activity,
               },
               {
-                label: "Rate Limit / Hour",
-                value: `${account.apiRateLimitPerHour.toLocaleString()} req`,
+                label: "Hourly Limit",
+                value: `${account.apiRateLimitPerHour?.toLocaleString() ?? "0"} req`,
+                icon: Zap,
               },
               {
-                label: "Rate Limit / Day",
-                value: `${account.apiRateLimitPerDay.toLocaleString()} req`,
+                label: "Daily Limit",
+                value: `${account.apiRateLimitPerDay?.toLocaleString() ?? "0"} req`,
+                icon: Calendar,
               },
-              ...(account.apiLastUsedAt
-                ? [
-                    {
-                      label: "Last Used",
-                      value: new Date(
-                        account.apiLastUsedAt,
-                      ).toLocaleDateString(),
-                    },
-                  ]
-                : []),
-              ...(account.webhookUrl
-                ? [{ label: "Webhook URL", value: account.webhookUrl }]
-                : []),
-              ...(account.allowedIPs.length > 0
-                ? [
-                    {
-                      label: "Allowed IPs",
-                      value: `${account.allowedIPs.length} configured`,
-                    },
-                  ]
-                : []),
-            ].map(({ label, value }) => (
+              {
+                label: "Last Used",
+                value: account.apiLastUsedAt
+                  ? new Date(account.apiLastUsedAt).toLocaleDateString()
+                  : "Never",
+                icon: Calendar,
+              },
+            ].map(({ label, value, icon: Icon }) => (
               <div
                 key={label}
-                className='bg-white/5 border border-white/10 rounded-lg p-3'
+                className='bg-white/5 border border-white/10 rounded-lg p-3.5 space-y-1.5'
               >
-                <p className='text-xs text-gray-500 mb-1'>{label}</p>
+                <div className='flex items-center gap-1.5 text-xs text-gray-500'>
+                  <Icon className='w-3.5 h-3.5' />
+                  {label}
+                </div>
                 <p
-                  className='text-sm text-white font-medium truncate'
+                  className='text-sm text-white font-semibold truncate'
                   title={value}
                 >
                   {value}
@@ -439,59 +481,100 @@ function ApiAccessTab() {
             ))}
           </div>
 
-          {/* Danger zone */}
-          <div className='bg-red-500/5 border border-red-500/20 rounded-xl p-4'>
-            <p className='text-sm font-medium text-red-400 mb-1'>Danger Zone</p>
-            <p className='text-xs text-gray-500 mb-3'>
-              Deleting API credentials is irreversible. All integrations using
-              these keys will stop working immediately.
-            </p>
+          {account.wallet && (
+            <div className='bg-gradient-to-br from-cyan-500/5 to-purple-500/5 border border-cyan-500/20 rounded-xl p-5'>
+              <h3 className='text-sm font-semibold text-white mb-3 flex items-center gap-2'>
+                <Wallet className='w-4 h-4 text-cyan-400' />
+                Token Wallet
+              </h3>
+              <div className='grid grid-cols-2 sm:grid-cols-4 gap-3'>
+                {[
+                  { label: "Balance", value: account.wallet.balance },
+                  {
+                    label: "Purchased",
+                    value: account.wallet.lifetimePurchased,
+                  },
+                  { label: "Used", value: account.wallet.lifetimeUsed },
+                  { label: "Spent", value: `₹${account.wallet.lifetimeSpent}` },
+                ].map(({ label, value }) => (
+                  <div key={label}>
+                    <p className='text-xs text-gray-500 mb-1'>{label}</p>
+                    <p className='text-base text-white font-bold'>{value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {account.salesmen && (
+            <div className='bg-white/5 border border-white/10 rounded-lg p-4'>
+              <p className='text-xs text-gray-500 mb-2'>Linked Salesmen</p>
+              <p className='text-sm text-white font-medium'>
+                {account.salesmen.linkedCount} / {account.salesmen.maxAllowed}{" "}
+                salesmen linked
+              </p>
+            </div>
+          )}
+
+          <div className='bg-gradient-to-br from-red-500/5 to-red-500/[0.02] border border-red-500/20 rounded-xl p-5 space-y-3'>
+            <div className='flex items-start gap-2'>
+              <AlertCircle className='w-5 h-5 text-red-400 mt-0.5 flex-shrink-0' />
+              <div>
+                <p className='text-sm font-semibold text-red-400'>
+                  Danger Zone
+                </p>
+                <p className='text-xs text-gray-500 mt-1'>
+                  Deleting credentials is permanent. All API integrations will
+                  stop immediately.
+                </p>
+              </div>
+            </div>
             <button
               onClick={handleDelete}
               disabled={isDisabling}
-              className='flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 disabled:opacity-50 transition-colors'
+              className='flex items-center gap-1.5 text-sm px-4 py-2.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 disabled:opacity-50 transition-all font-medium'
             >
               {isDisabling ? (
                 <Loader2 className='w-4 h-4 animate-spin' />
               ) : (
                 <Trash2 className='w-4 h-4' />
               )}
-              Delete API Credentials
+              Delete Credentials
             </button>
           </div>
         </div>
       )}
 
       {isError && (
-        <div className='flex items-center gap-2 text-sm text-red-400'>
+        <div className='flex items-center gap-2 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg p-3'>
           <AlertCircle className='w-4 h-4' />
-          Failed to load API account details.
+          Failed to load API account details
         </div>
       )}
     </div>
   );
 }
 
-// ------------------------------------------------------------------
-// Tab: Security
-// ------------------------------------------------------------------
 function SecurityTab() {
   const items = [
     {
       title: "Password",
       description:
-        "Change your account password. You'll be logged out of all other sessions.",
+        "Change your account password. You'll be logged out of all sessions.",
       action: "Change Password",
+      icon: Lock,
     },
     {
       title: "Active Sessions",
       description: "View and revoke active login sessions.",
       action: "Manage Sessions",
+      icon: Activity,
     },
     {
       title: "Two-Factor Authentication",
       description: "Add an extra layer of security to your account.",
       action: "Set Up 2FA",
+      icon: Shield,
     },
   ];
 
@@ -500,19 +583,24 @@ function SecurityTab() {
       <div>
         <h2 className='text-lg font-semibold text-white'>Security</h2>
         <p className='text-sm text-gray-400 mt-0.5'>
-          Manage authentication and session settings.
+          Authentication and session settings
         </p>
       </div>
 
       <div className='space-y-3'>
-        {items.map(({ title, description, action }) => (
+        {items.map(({ title, description, action, icon: Icon }) => (
           <div
             key={title}
             className='bg-white/5 border border-white/10 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3'
           >
-            <div>
-              <p className='text-sm font-medium text-white'>{title}</p>
-              <p className='text-xs text-gray-400 mt-0.5'>{description}</p>
+            <div className='flex items-start gap-3'>
+              <div className='w-10 h-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0'>
+                <Icon className='w-5 h-5 text-gray-400' />
+              </div>
+              <div>
+                <p className='text-sm font-medium text-white'>{title}</p>
+                <p className='text-xs text-gray-400 mt-0.5'>{description}</p>
+              </div>
             </div>
             <button
               disabled
@@ -527,9 +615,6 @@ function SecurityTab() {
   );
 }
 
-// ------------------------------------------------------------------
-// Tab: Notifications
-// ------------------------------------------------------------------
 function NotificationsTab() {
   const [prefs, setPrefs] = useState({
     orderUpdates: true,
@@ -573,7 +658,7 @@ function NotificationsTab() {
       <div>
         <h2 className='text-lg font-semibold text-white'>Notifications</h2>
         <p className='text-sm text-gray-400 mt-0.5'>
-          Configure which alerts and emails you receive.
+          Configure alerts and email preferences
         </p>
       </div>
 
@@ -589,16 +674,12 @@ function NotificationsTab() {
             </div>
             <button
               onClick={() => toggle(key)}
-              className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${
-                prefs[key] ? "bg-cyan-500" : "bg-white/10"
-              }`}
-              aria-checked={prefs[key]}
+              className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${prefs[key] ? "bg-cyan-500" : "bg-white/10"}`}
               role='switch'
+              aria-checked={prefs[key]}
             >
               <span
-                className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
-                  prefs[key] ? "translate-x-5" : "translate-x-0.5"
-                }`}
+                className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${prefs[key] ? "translate-x-5" : "translate-x-0.5"}`}
               />
             </button>
           </div>
@@ -615,9 +696,6 @@ function NotificationsTab() {
   );
 }
 
-// ------------------------------------------------------------------
-// Root: SettingsPage
-// ------------------------------------------------------------------
 export default function SettingsPage() {
   const { data: profile, isLoading } = useGetUserProfileQuery();
   const role = (profile?.role ?? "DIRECT_CUSTOMER") as UserRole;
@@ -646,12 +724,11 @@ export default function SettingsPage() {
         <div className='mb-6'>
           <h1 className='text-2xl font-bold text-white'>Settings</h1>
           <p className='text-sm text-gray-400 mt-1'>
-            Manage your account configuration and preferences.
+            Manage your account configuration and preferences
           </p>
         </div>
 
         <div className='flex flex-col lg:flex-row gap-6'>
-          {/* Sidebar nav */}
           <nav className='lg:w-52 flex-shrink-0'>
             <div className='bg-white/5 border border-white/10 rounded-2xl p-2 flex lg:flex-col gap-1'>
               {visibleTabs.map(({ id, label, icon: Icon }) => (
@@ -671,7 +748,6 @@ export default function SettingsPage() {
             </div>
           </nav>
 
-          {/* Content panel */}
           <div className='flex-1 bg-white/5 border border-white/10 rounded-2xl p-5 sm:p-6 backdrop-blur-sm min-h-[400px]'>
             {resolvedTab === "profile" && <ProfileTab />}
             {resolvedTab === "api-access" && role === "DEALERSHIP_OWNER" && (

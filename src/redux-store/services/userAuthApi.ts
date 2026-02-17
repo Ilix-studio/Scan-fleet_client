@@ -153,6 +153,22 @@ export const userAuthApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+    updateUserProfile: builder.mutation<
+      {
+        success: boolean;
+        user: UserData & { businessAddress?: string; gstNumber?: string };
+      },
+      {
+        name?: string;
+        phone?: string;
+        businessName?: string;
+        businessAddress?: string;
+        gstNumber?: string;
+      }
+    >({
+      query: (body) => ({ url: "/user-auth/profile", method: "PATCH", body }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
@@ -163,4 +179,5 @@ export const {
   useUserLogoutMutation,
   useGetUserProfileQuery,
   useUpdateUserRoleMutation,
+  useUpdateUserProfileMutation,
 } = userAuthApi;
