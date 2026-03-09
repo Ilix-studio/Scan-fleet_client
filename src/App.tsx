@@ -1,40 +1,98 @@
-import { Route, Routes, useLocation } from "react-router-dom";
+// src/App.tsx
+import { Route, Routes, useLocation, Navigate, Outlet } from "react-router-dom";
 import "./App.css";
+import { useEffect } from "react";
+import { Toaster } from "react-hot-toast";
+import { useSelector } from "react-redux";
+
+import {
+  selectIsAuthenticated,
+  selectCurrentUser,
+} from "@/redux-store/slices/authSlice";
+import {
+  selectIsAdminAuthenticated,
+  selectCurrentAdmin,
+} from "@/redux-store/slices/adminAuthSlice";
+
+// Public / Auth pages
 import Home from "./mainComponent/Home/Home";
 import Signup from "./mainComponent/Pages/auth/Signup";
 import Login from "./mainComponent/Pages/auth/Login";
+import AdminLogin from "./mainComponent/Layout/Admin/AdminLogin";
+import NotFound from "./mainComponent/Home/NotFound";
+import ApiDocs from "./mainComponent/Layout/External/APIDocs";
 
-import StickerEditor from "./mainComponent/Features/StickerEditor";
-
-import { useEffect } from "react";
-import { Toaster } from "react-hot-toast";
+// Role dashboards
+import UserDashboardPage from "./mainComponent/Layout/Dashboard/Profile/UserDashboardPage";
+import DealerDashboardPage from "./mainComponent/Layout/Dashboard/Profile/DealerDashboardPage";
+import RentalDashboardPage from "./mainComponent/Layout/Dashboard/Profile/RentalDashboardPage";
 import AdminDashboardPage from "./mainComponent/Layout/Admin/AdminDashboardPage";
 
-import AdminLogin from "./mainComponent/Layout/Admin/AdminLogin";
-import StickerProduct from "./mainComponent/Pages/sticker/StickerProduct";
-import FillDetails from "./mainComponent/Pages/sticker/FillDetails";
-import RentalDashboardPage from "./mainComponent/Layout/Dashboard/Profile/RentalDashboardPage";
-import DealerDashboardPage from "./mainComponent/Layout/Dashboard/Profile/DealerDashboardPage";
-import UserDashboardPage from "./mainComponent/Layout/Dashboard/Profile/UserDashboardPage";
+// Admin-only pages
 import AdminCreateTags from "./mainComponent/Layout/Admin/AdminCreateTags";
-import StickerStyle from "./mainComponent/Features/ProductCard/StickerStyle";
 
+// Shared authenticated pages
 import WalletPage from "./mainComponent/Pages/dashboard/shared/WalletPage";
-import NotFound from "./mainComponent/Home/NotFound";
 import TokenDisplayPage from "./mainComponent/Pages/dashboard/shared/TokenDisplayPage";
 import PurchaseHistoryPage from "./mainComponent/Pages/dashboard/shared/PurchaseHistoryPage";
 import UseTokenPage from "./mainComponent/Pages/dashboard/shared/UseTokenPage";
+import SettingsPage from "./mainComponent/Layout/Dashboard/SettingPage";
 
+// Sticker flow
+import StickerStyle from "./mainComponent/Features/ProductCard/StickerStyle";
+import StickerProduct from "./mainComponent/Pages/sticker/StickerProduct";
+import StickerEditor from "./mainComponent/Features/StickerEditor";
+import FillDetails from "./mainComponent/Pages/sticker/FillDetails";
+
+// Dealer-specific pages
 import CreatePasskeyPage from "./mainComponent/Pages/dashboard/dealer/createP/CreatePasskeyPage";
 import ConnectSalesmanPage from "./mainComponent/Pages/dashboard/dealer/connectSM/ConnectSalesmanPage";
 import MyDealershipPage from "./mainComponent/Pages/dashboard/dealer/salesman/MyDealershipPage";
-import ApiDocs from "./mainComponent/Layout/External/APIDocs";
-import SettingsPage from "./mainComponent/Layout/Dashboard/SettingPage";
+import ProtectedRoute, {
+  ROLE_HOME_ROUTES,
+  RouteRole,
+} from "./config/ProtectedRoute";
+
+import TrackOrderPage from "./mainComponent/Pages/dashboard/shared/TrackOrderPage";
+
+// ── Layout route guard ─────────────────────────────────────────────────────────
+// Pathless parent route — just enforces auth/role, renders children via <Outlet>.
+const Guard = ({
+  roles,
+  loginPath,
+}: {
+  roles?: RouteRole | RouteRole[];
+  loginPath?: string;
+}) => (
+  <ProtectedRoute allowedRoles={roles} loginPath={loginPath}>
+    <Outlet />
+  </ProtectedRoute>
+);
+
+// ── Bounce authenticated users away from login pages ──────────────────────────
+const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const isUserAuth = useSelector(selectIsAuthenticated);
+  const user = useSelector(selectCurrentUser);
+  const isAdminAuth = useSelector(selectIsAdminAuthenticated);
+  const admin = useSelector(selectCurrentAdmin);
+
+  if (isAdminAuth && admin) {
+    return (
+      <Navigate
+        to={ROLE_HOME_ROUTES[admin.role] ?? "/admin-dashboard"}
+        replace
+      />
+    );
+  }
+  if (isUserAuth && user) {
+    return <Navigate to={ROLE_HOME_ROUTES[user.role] ?? "/"} replace />;
+  }
+  return <>{children}</>;
+};
 
 const App = () => {
   const location = useLocation();
 
-  // Scroll to top when route changes
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
@@ -45,15 +103,8 @@ const App = () => {
         position='top-right'
         reverseOrder={false}
         gutter={8}
-        containerClassName=''
-        containerStyle={{
-          top: 20,
-          left: 20,
-          bottom: 20,
-          right: 20,
-        }}
+        containerStyle={{ top: 20, left: 20, bottom: 20, right: 20 }}
         toastOptions={{
-          // Default options for all toasts
           duration: 3000,
           style: {
             background: "#fff",
@@ -61,19 +112,15 @@ const App = () => {
             border: "1px solid #e5e7eb",
             borderRadius: "8px",
             boxShadow:
-              "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+              "0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05)",
             fontSize: "14px",
             maxWidth: "420px",
             padding: "12px 16px",
-            fontFamily: "system-ui, -apple-system, sans-serif",
+            fontFamily: "system-ui,-apple-system,sans-serif",
           },
-          // Specific styles for different toast types
           success: {
             duration: 4000,
-            iconTheme: {
-              primary: "#10b981",
-              secondary: "#fff",
-            },
+            iconTheme: { primary: "#10b981", secondary: "#fff" },
             style: {
               border: "1px solid #10b981",
               background: "#f0fdf4",
@@ -82,10 +129,7 @@ const App = () => {
           },
           error: {
             duration: 5000,
-            iconTheme: {
-              primary: "#ef4444",
-              secondary: "#fff",
-            },
+            iconTheme: { primary: "#ef4444", secondary: "#fff" },
             style: {
               border: "1px solid #ef4444",
               background: "#fef2f2",
@@ -102,39 +146,98 @@ const App = () => {
           },
         }}
       />
+
       <Routes>
+        {/* ── Public ─────────────────────────────────────────────────────── */}
         <Route path='/' element={<Home />} />
-        <Route path='/signup' element={<Signup />} />
-        <Route path='/admin-login' element={<AdminLogin />} />
-        <Route path='/login' element={<Login />} />
         <Route path='/api-reference' element={<ApiDocs />} />
 
-        {/* User dashboards - organized by role */}
-        <Route path='/user-dashboard' element={<UserDashboardPage />} />
-        <Route path='/dealer-dashboard' element={<DealerDashboardPage />} />
-        <Route path='/rental-dashboard' element={<RentalDashboardPage />} />
-        <Route path='/admin-dashboard' element={<AdminDashboardPage />} />
-        <Route path='/sticker-style' element={<StickerStyle />} />
+        {/* ── Auth pages (bounce if already authenticated) ────────────────── */}
+        <Route
+          path='/login'
+          element={
+            <AuthGuard>
+              <Login />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path='/signup'
+          element={
+            <AuthGuard>
+              <Signup />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path='/admin-login'
+          element={
+            <AuthGuard>
+              <AdminLogin />
+            </AuthGuard>
+          }
+        />
 
-        {/* Setting routes */}
-        <Route path='/settings' element={<SettingsPage />} />
+        {/* ── Admin ───────────────────────────────────────────────────────── */}
+        <Route
+          element={
+            <Guard roles={["ADMIN", "SUPER_ADMIN"]} loginPath='/admin-login' />
+          }
+        >
+          <Route path='/admin-dashboard' element={<AdminDashboardPage />} />
+          <Route path='/admin-create-tags' element={<AdminCreateTags />} />
+        </Route>
 
-        {/* Admin dashboards */}
-        <Route path='/admin-create-tags' element={<AdminCreateTags />} />
+        {/* ── Role dashboards ─────────────────────────────────────────────── */}
+        <Route element={<Guard roles='DIRECT_CUSTOMER' />}>
+          <Route path='/user-dashboard' element={<UserDashboardPage />} />
+        </Route>
 
-        {/* sticker product */}
-        <Route path='/sticker-select' element={<StickerProduct />} />
-        <Route path='/sticker-editor' element={<StickerEditor />} />
-        <Route path='/fill-details' element={<FillDetails />} />
-        <Route path='/purchase-token' element={<TokenDisplayPage />} />
-        <Route path='/wallet' element={<WalletPage />} />
-        <Route path='/purchase-history' element={<PurchaseHistoryPage />} />
-        <Route path='/create-passkeys' element={<CreatePasskeyPage />} />
-        <Route path='/connect-colleague' element={<ConnectSalesmanPage />} />
-        <Route path='/use-token' element={<UseTokenPage />} />
+        <Route
+          element={
+            <Guard roles={["DEALERSHIP_OWNER", "DEALERSHIP_SALESMAN"]} />
+          }
+        >
+          <Route path='/dealer-dashboard' element={<DealerDashboardPage />} />
+        </Route>
 
-        {/* Other routes */}
-        <Route path='/my-dealership' element={<MyDealershipPage />} />
+        <Route element={<Guard roles='RENTAL_OWNER' />}>
+          <Route path='/rental-dashboard' element={<RentalDashboardPage />} />
+        </Route>
+
+        {/* ── Dealer-specific ─────────────────────────────────────────────── */}
+        <Route
+          element={
+            <Guard roles={["DEALERSHIP_OWNER", "DEALERSHIP_SALESMAN"]} />
+          }
+        >
+          <Route path='/create-passkeys' element={<CreatePasskeyPage />} />
+          <Route path='/my-dealership' element={<MyDealershipPage />} />
+        </Route>
+
+        <Route element={<Guard roles='DEALERSHIP_OWNER' />}>
+          <Route path='/connect-colleague' element={<ConnectSalesmanPage />} />
+        </Route>
+
+        {/* ── Shared user routes (any non-admin authenticated user) ────────── */}
+        <Route element={<Guard roles='ANY_USER' />}>
+          <Route path='/settings' element={<SettingsPage />} />
+          <Route path='/wallet' element={<WalletPage />} />
+          <Route path='/what-is-token' element={<TokenDisplayPage />} />
+          <Route path='/purchase-history' element={<PurchaseHistoryPage />} />
+          <Route path='/use-token' element={<UseTokenPage />} />
+        </Route>
+
+        {/* ── Sticker flow (any authenticated principal) ───────────────────── */}
+        <Route element={<Guard roles='ANY_AUTH' />}>
+          <Route path='/sticker-style' element={<StickerStyle />} />
+          <Route path='/sticker-select' element={<StickerProduct />} />
+          <Route path='/sticker-editor' element={<StickerEditor />} />
+          <Route path='/fill-details' element={<FillDetails />} />
+          <Route path='/track-orders' element={<TrackOrderPage />} />
+        </Route>
+
+        {/* ── Fallback ────────────────────────────────────────────────────── */}
         <Route path='*' element={<NotFound />} />
       </Routes>
     </>

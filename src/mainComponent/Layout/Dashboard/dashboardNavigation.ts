@@ -42,7 +42,7 @@ export const dealershipOwnerNavigation: NavigationSection[] = [
       {
         label: "What is Token?",
         icon: BadgeHelp,
-        path: "/purchase-token",
+        path: "/what-is-token",
       },
     ],
   },
@@ -92,9 +92,7 @@ export const dealershipOwnerNavigation: NavigationSection[] = [
   },
   {
     title: "Other Features",
-    items: [
-      { label: "Reports", icon: FileText, path: "/dealer-dashboard/reports" },
-    ],
+    items: [{ label: "Own number", icon: PhoneCall, path: "/own-number" }],
   },
 ];
 
@@ -106,7 +104,7 @@ export const dealershipSalesmanNavigation: NavigationSection[] = [
       {
         label: "What is Token?",
         icon: BadgeHelp,
-        path: "/purchase-token",
+        path: "/what-is-token",
       },
     ],
   },
