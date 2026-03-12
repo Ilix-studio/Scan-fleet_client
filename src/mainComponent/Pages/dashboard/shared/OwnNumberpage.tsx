@@ -9,8 +9,7 @@ import {
   dealershipOwnerNavigation,
   dealershipSalesmanNavigation,
 } from "@/mainComponent/Layout/Dashboard/dashboardNavigation";
-import TokenDisplay from "../../TokenDisplay";
-import SafetyPitch from "../../sticker/SafetyPitch";
+import { UseToken } from "../../UseToken";
 
 const NAV_BY_ROLE: Record<string, typeof dealershipOwnerNavigation> = {
   DEALERSHIP_OWNER: dealershipOwnerNavigation,
@@ -18,7 +17,7 @@ const NAV_BY_ROLE: Record<string, typeof dealershipOwnerNavigation> = {
   RENTAL_OWNER: rentalOwnerNavigation,
 };
 
-export default function TokenDisplayPage() {
+export default function OwnNumberPage() {
   const { data: profile, isLoading } = useGetUserProfileQuery();
 
   if (isLoading) {
@@ -34,8 +33,7 @@ export default function TokenDisplayPage() {
 
   return (
     <DashboardLayout sidebar={<DashboardSidebar navigation={navigation} />}>
-      <SafetyPitch role={profile?.role ?? "DIRECT_CUSTOMER"} />
-      <TokenDisplay />
+      <UseToken />
     </DashboardLayout>
   );
 }
