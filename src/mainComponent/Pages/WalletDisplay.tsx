@@ -58,10 +58,10 @@ const TOKEN_PACKAGES = [
 ];
 
 const ROLE_PRICING: Record<string, number> = {
-  DEALERSHIP_OWNER: 299,
-  DEALERSHIP_SALESMAN: 299,
-  RENTAL_OWNER: 299,
-  DIRECT_CUSTOMER: 499,
+  DEALERSHIP_OWNER: 2,
+  DEALERSHIP_SALESMAN: 2,
+  RENTAL_OWNER: 2,
+  DIRECT_CUSTOMER: 4,
 };
 
 const MAX_TOKEN_QUANTITY = 1000;
@@ -80,12 +80,17 @@ export default function WalletDisplay() {
   const [createOrder] = useCreateOrderMutation();
   const [verifyPayment] = useVerifyPaymentMutation();
 
+  // after profile is declared
+  const [optimisticBalance, setOptimisticBalance] = useState<number | null>(
+    null,
+  );
+  const walletBalance = optimisticBalance ?? profile?.walletBalance ?? 0;
+
   // FIX #1: Validate role pricing
   const userRole = profile?.role;
   const pricePerToken =
     userRole && userRole in ROLE_PRICING ? ROLE_PRICING[userRole] : null;
 
-  const walletBalance = profile?.walletBalance ?? 0;
   const lifetimePurchased = profile?.lifetimeTokensPurchased ?? 0;
   // FIX #2: Correct field for used tokens
   const lifetimeUsed = profile?.lifetimeTokensPurchased ?? 0;
@@ -170,12 +175,15 @@ export default function WalletDisplay() {
               razorpay_signature: rzpResponse.razorpay_signature,
             }).unwrap();
 
+            setOptimisticBalance(result.data.walletBalance);
+
             toast.success(
               `${result.data.tokensAdded} token${result.data.tokensAdded > 1 ? "s" : ""} added!`,
             );
 
             // FIX #5: Refetch data after successful payment
             await Promise.all([refetchProfile(), refetchHistory()]);
+            setOptimisticBalance(null); // hand off to refetched profile
           } catch {
             toast.error("Payment verification failed");
           } finally {

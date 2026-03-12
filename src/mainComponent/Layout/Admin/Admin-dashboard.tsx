@@ -49,44 +49,6 @@ const userData = [
   { name: "Suspended", value: 145, fill: "hsl(var(--chart-3))" },
 ];
 
-const recentTransactions = [
-  {
-    id: 1,
-    user: "Raj Kumar",
-    amount: "₹3,000",
-    date: "2025-01-10",
-    status: "Completed",
-  },
-  {
-    id: 2,
-    user: "Priya Singh",
-    amount: "₹1,500",
-    date: "2025-01-09",
-    status: "Completed",
-  },
-  {
-    id: 3,
-    user: "Amit Patel",
-    amount: "₹6,000",
-    date: "2025-01-09",
-    status: "Pending",
-  },
-  {
-    id: 4,
-    user: "Neha Sharma",
-    amount: "₹2,100",
-    date: "2025-01-08",
-    status: "Completed",
-  },
-  {
-    id: 5,
-    user: "Vikram Singh",
-    amount: "₹4,500",
-    date: "2025-01-08",
-    status: "Failed",
-  },
-];
-
 export default function AdminDashboard() {
   return (
     <div className='space-y-8'>
@@ -214,67 +176,6 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Recent Transactions */}
-      <Card className='bg-white/5 backdrop-blur-xl border border-white/10'>
-        <CardHeader>
-          <CardTitle className='text-white'>Recent Transactions</CardTitle>
-          <CardDescription className='text-white/60'>
-            Latest payment activities
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className='overflow-x-auto'>
-            <table className='w-full text-sm'>
-              <thead>
-                <tr className='border-b border-white/10'>
-                  <th className='text-left py-3 px-4 text-white/70 font-medium'>
-                    User
-                  </th>
-                  <th className='text-left py-3 px-4 text-white/70 font-medium'>
-                    Amount
-                  </th>
-                  <th className='text-left py-3 px-4 text-white/70 font-medium'>
-                    Date
-                  </th>
-                  <th className='text-left py-3 px-4 text-white/70 font-medium'>
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentTransactions.map((transaction) => (
-                  <tr
-                    key={transaction.id}
-                    className='border-b border-white/5 hover:bg-white/5 transition-colors'
-                  >
-                    <td className='py-3 px-4 text-white'>{transaction.user}</td>
-                    <td className='py-3 px-4 font-semibold text-white'>
-                      {transaction.amount}
-                    </td>
-                    <td className='py-3 px-4 text-white/60'>
-                      {transaction.date}
-                    </td>
-                    <td className='py-3 px-4'>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          transaction.status === "Completed"
-                            ? "bg-green-500/20 text-green-300"
-                            : transaction.status === "Pending"
-                            ? "bg-yellow-500/20 text-yellow-300"
-                            : "bg-red-500/20 text-red-300"
-                        }`}
-                      >
-                        {transaction.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
