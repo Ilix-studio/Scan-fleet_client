@@ -13,6 +13,8 @@ import {
   Settings,
   LogOut,
   ScanQrCode,
+  Tags,
+  Binary,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
@@ -33,14 +35,14 @@ export default function DashboardSidebar({ userType }: DashboardSidebarProps) {
       action: () => navigate("/admin-dashboard"),
     },
     {
-      label: "Create Tags",
-      icon: LayoutDashboard,
-      action: () => navigate("/admin-create-tags"),
+      label: "Tags Requests",
+      icon: Tags,
+      action: () => navigate("/admin-dispatch"),
     },
     {
-      label: "User Management",
-      icon: Users,
-      action: () => navigate("/admin-user-management"),
+      label: "Attach Codes",
+      icon: Binary,
+      action: () => navigate("/get-all-ac"),
     },
     {
       label: "Transactions",

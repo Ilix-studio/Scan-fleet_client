@@ -8,6 +8,7 @@ import { Guard, AuthGuard, PageLoader } from "@/config/Guards";
 // Emergency page (QR scan entry): most latency-critical bystander flow —
 // import eagerly so it renders without waiting for any JS chunk download.
 import Home from "@/mainComponent/Home/Home";
+import GetAllAcPage from "./mainComponent/Layout/Admin/Wrapper/GetAllAcPage";
 
 // ── Lazy loaded ───────────────────────────────────────────────────────────────
 // Auth
@@ -30,10 +31,14 @@ const RentalDashboardPage = lazy(
   () => import("@/mainComponent/Layout/Dashboard/Profile/RentalDashboardPage"),
 );
 const AdminDashboardPage = lazy(
-  () => import("@/mainComponent/Layout/Admin/AdminDashboardPage"),
+  () => import("@/mainComponent/Layout/Admin/Wrapper/AdminDashboardPage"),
 );
-const AdminCreateTags = lazy(
-  () => import("@/mainComponent/Layout/Admin/AdminCreateTags"),
+
+const AdminDispatchPage = lazy(
+  () => import("@/mainComponent/Layout/Admin/Wrapper/AdminDispatchPage"),
+);
+const GetPrintPage = lazy(
+  () => import("@/mainComponent/Layout/Admin/Wrapper/GetPrintPage"),
 );
 
 // Shared authenticated
@@ -126,7 +131,9 @@ export const AppRoutes = () => (
         }
       >
         <Route path='/admin-dashboard' element={<AdminDashboardPage />} />
-        <Route path='/admin-create-tags' element={<AdminCreateTags />} />
+        <Route path='/admin-dispatch' element={<AdminDispatchPage />} />
+        <Route path='/get-print-sheet' element={<GetPrintPage />} />
+        <Route path='/get-all-ac' element={<GetAllAcPage />} />
       </Route>
 
       {/* ── Role dashboards ─────────────────────────────────────────────────── */}
