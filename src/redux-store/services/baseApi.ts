@@ -87,6 +87,7 @@ export const baseApi = createApi({
     "MyDealership",
     "ApiAccount",
     "Dispatch",
+    "Analytics",
   ],
   endpoints: () => ({}),
 });
