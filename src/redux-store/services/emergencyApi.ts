@@ -1,27 +1,33 @@
-// emergencyApi.ts
+// replace entire emergencyApi.ts
 import { baseApi } from "./baseApi";
 
 export interface EmergencyData {
-  dealerName: string | null;
   maskedOwnerNumber: string;
   emergency1: string;
   emergency2: string;
   dealerNumber: string;
   vehicleInfo?: {
-    registrationNumber: string;
+    registrationNumber?: string;
     model?: string;
     color?: string;
     year?: number;
   };
+  dealerName: string | null;
+  businessName: string | null;
   activatedAt: string;
+}
+
+export interface EmergencyPageResponse {
+  success: boolean;
+  activated: boolean;
+  attachCode: string;
+  data: EmergencyData | null;
 }
 
 export const emergencyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getEmergencyData: builder.query<EmergencyData, string>({
+    getEmergencyData: builder.query<EmergencyPageResponse, string>({
       query: (identifier) => `/emergency/${identifier}`,
-      transformResponse: (res: { success: boolean; data: EmergencyData }) =>
-        res.data,
     }),
   }),
   overrideExisting: false,

@@ -81,7 +81,6 @@ export const baseApi = createApi({
     "Sticker",
     "StickerGarage",
     "Purchase",
-    "Analytics",
     "Passkeys",
     "LinkedSalesmen",
     "MyDealership",
