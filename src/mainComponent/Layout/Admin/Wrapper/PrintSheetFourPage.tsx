@@ -1,7 +1,7 @@
 import DashboardSidebar from "../../AdminDashboardSidebar";
-import GetPrintSheet from "../GetPrintSheet";
+import PrintSheetFour from "../PrintSheetFour";
 
-export default function GetPrintPage() {
+export default function PrintSheetFourPage() {
   return (
     <div className='min-h-screen w-full relative bg-black'>
       {/* Aurora Background */}
@@ -23,7 +23,7 @@ export default function GetPrintPage() {
         <DashboardSidebar />
         <main className='flex-1 overflow-auto'>
           <div className='p-6 md:p-8 max-w-7xl mx-auto'>
-            <GetPrintSheet />
+            <PrintSheetFour />
           </div>
         </main>
       </div>
