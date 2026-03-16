@@ -20,7 +20,7 @@ export default function GetAllAcPage() {
 
       {/* Dashboard Layout */}
       <div className='relative z-10 flex'>
-        <DashboardSidebar userType='admin' />
+        <DashboardSidebar />
         <main className='flex-1 overflow-auto'>
           <div className='p-6 md:p-8 max-w-7xl mx-auto'>
             <GetAll_Ac />
