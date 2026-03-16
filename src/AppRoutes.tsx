@@ -8,7 +8,7 @@ import { Guard, AuthGuard, PageLoader } from "@/config/Guards";
 // Emergency page (QR scan entry): most latency-critical bystander flow —
 // import eagerly so it renders without waiting for any JS chunk download.
 import Home from "@/mainComponent/Home/Home";
-import GetAllAcPage from "./mainComponent/Layout/Admin/Wrapper/GetAllAcPage";
+import EmergencyPage from "./mainComponent/Pages/EmergencyPage";
 
 // ── Lazy loaded ───────────────────────────────────────────────────────────────
 // Auth
@@ -39,6 +39,14 @@ const AdminDispatchPage = lazy(
 );
 const GetPrintPage = lazy(
   () => import("@/mainComponent/Layout/Admin/Wrapper/GetPrintPage"),
+);
+
+const GetAllAcPage = lazy(
+  () => import("@/mainComponent/Layout/Admin/Wrapper/GetAllAcPage"),
+);
+
+const PrintSheetFourPage = lazy(
+  () => import("@/mainComponent/Layout/Admin/Wrapper/PrintSheetFourPage"),
 );
 
 // Shared authenticated
@@ -97,6 +105,7 @@ export const AppRoutes = () => (
       {/* ── Public ─────────────────────────────────────────────────────────── */}
       <Route path='/' element={<Home />} />
       <Route path='/api-reference' element={<ApiDocs />} />
+      <Route path='/emergency/:identifier' element={<EmergencyPage />} />
 
       {/* ── Auth — redirect if already authenticated ────────────────────────── */}
       <Route
@@ -132,8 +141,9 @@ export const AppRoutes = () => (
       >
         <Route path='/admin-dashboard' element={<AdminDashboardPage />} />
         <Route path='/admin-dispatch' element={<AdminDispatchPage />} />
-        <Route path='/get-print-sheet' element={<GetPrintPage />} />
         <Route path='/get-all-ac' element={<GetAllAcPage />} />
+        <Route path='/get-print-sheet' element={<GetPrintPage />} />
+        <Route path='/print-sheet-four' element={<PrintSheetFourPage />} />
       </Route>
 
       {/* ── Role dashboards ─────────────────────────────────────────────────── */}

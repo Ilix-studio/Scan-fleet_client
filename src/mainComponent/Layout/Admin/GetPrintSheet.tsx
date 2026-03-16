@@ -20,12 +20,14 @@ import {
   useGetPrintDataQuery,
   type PrintCode,
 } from "@/redux-store/services/AdminCentrix/adminDispatchApi";
+import { Button } from "@/components/ui/button";
 
 type Tab = "codes" | "shipping";
 
 // ─── Attach code row ──────────────────────────────────────────────────────────
 
 function AttachCodeRow({ code, index }: { code: PrintCode; index: number }) {
+  const navigate = useNavigate();
   return (
     <div className='flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl px-4 py-3 hover:border-white/20 transition-colors'>
       <div className='w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0'>
@@ -46,6 +48,13 @@ function AttachCodeRow({ code, index }: { code: PrintCode; index: number }) {
           </span>
         </div>
       </div>
+      <Button
+        onClick={() => navigate(`/print-sheet-four?tokenId=${code.tokenId}`)}
+        className='flex items-center gap-2 justify-center bg-white/5 border border-white/10 text-green-600 hover:bg-white/10'
+      >
+        <Printer size={16} />
+        Print
+      </Button>
 
       <a
         href={code.qrUrl}
@@ -263,6 +272,7 @@ export default function GetPrintSheet() {
                 Ready to print
               </div>
             </div>
+
             {codes.map((c, i) => (
               <AttachCodeRow key={c.attachCode} code={c} index={i} />
             ))}
